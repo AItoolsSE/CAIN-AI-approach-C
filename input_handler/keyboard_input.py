@@ -16,52 +16,30 @@ class KeyboardInput:
             'drop': pygame.K_SPACE
         }
         self.pressed_keys = set()  # Set to keep track of pressed keys
-        self.last_action_time = {
-            'left': 0,
-            'right': 0,
-            'down': 0,
-            'rotate': 0,
-            'drop': 0
-        }
-        self.cooldown = {
-            'left': 200,  # Cooldown in milliseconds
-            'right': 200,
-            'down': 100,
-            'rotate': 300,
-            'drop': 500
-        }
 
-    def handle_event(self, event):
+    def handle_events(self):
         """
-        Handle individual keyboard events to update pressed_keys.
-        
-        :param event: The pygame event to handle.
+        Handle keyboard events and update the state of pressed keys.
         """
-        if event.type == pygame.KEYDOWN:
-            if event.key in self.keys.values():
-                self.pressed_keys.add(event.key)
-        elif event.type == pygame.KEYUP:
-            if event.key in self.keys.values():
-                self.pressed_keys.discard(event.key)
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key in self.keys.values():
+                    self.pressed_keys.add(event.key)
+            elif event.type == pygame.KEYUP:
+                if event.key in self.keys.values():
+                    self.pressed_keys.discard(event.key)
 
-    def is_key_pressed(self, action, current_time):
+    def is_key_pressed(self, action):
         """
-        Check if a specific action is currently being pressed and handle cooldown.
+        Check if a specific action is currently being pressed.
 
         Parameters:
             action (str): The action to check ('left', 'right', 'down', 'rotate', 'drop').
-            current_time (int): The current time in milliseconds.
 
         Returns:
-            bool: True if the key for the action is pressed and cooldown has elapsed, False otherwise.
+            bool: True if the key for the action is pressed, False otherwise.
         """
-        key_code = self.keys.get(action)
-        if key_code in self.pressed_keys:
-            elapsed_time = current_time - self.last_action_time[action]
-            if elapsed_time >= self.cooldown[action]:
-                self.last_action_time[action] = current_time
-                return True
-        return False
+        return self.keys.get(action) in self.pressed_keys
 
     def __del__(self):
         """

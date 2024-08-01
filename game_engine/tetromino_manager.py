@@ -4,13 +4,23 @@ import random
 
 class Tetromino:
     SHAPES = {
-        'I': ([(0, 1), (1, 1), (2, 1), (3, 1)], (0, 255, 255)),
-        'O': ([(1, 0), (2, 0), (1, 1), (2, 1)], (255, 255, 0)),
-        'T': ([(1, 0), (0, 1), (1, 1), (2, 1)], (128, 0, 128)),
-        'S': ([(1, 0), (2, 0), (0, 1), (1, 1)], (0, 255, 0)),
-        'Z': ([(0, 0), (1, 0), (1, 1), (2, 1)], (255, 0, 0)),
-        'J': ([(0, 0), (0, 1), (1, 1), (2, 1)], (0, 0, 255)),
-        'L': ([(2, 0), (0, 1), (1, 1), (2, 1)], (255, 165, 0))
+        'I': [(0, 1), (1, 1), (2, 1), (3, 1)],
+        'O': [(1, 0), (2, 0), (1, 1), (2, 1)],
+        'T': [(1, 0), (0, 1), (1, 1), (2, 1)],
+        'S': [(1, 0), (2, 0), (0, 1), (1, 1)],
+        'Z': [(0, 0), (1, 0), (1, 1), (2, 1)],
+        'J': [(0, 0), (0, 1), (1, 1), (2, 1)],
+        'L': [(2, 0), (0, 1), (1, 1), (2, 1)]
+    }
+
+    COLORS = {
+        'I': (0, 255, 255),  # Cyan
+        'O': (255, 255, 0),  # Yellow
+        'T': (128, 0, 128),  # Purple
+        'S': (0, 255, 0),    # Green
+        'Z': (255, 0, 0),    # Red
+        'J': (0, 0, 255),    # Blue
+        'L': (255, 165, 0)   # Orange
     }
 
     def __init__(self, shape=None):
@@ -18,7 +28,8 @@ class Tetromino:
         Initialize a new tetromino with a specified shape or a random shape if not provided.
         """
         self.shape = shape or random.choice(list(self.SHAPES.keys()))
-        self.blocks, self.color = self.SHAPES[self.shape]
+        self.blocks = self.SHAPES[self.shape]
+        self.color = self.COLORS[self.shape]
         self.position = (3, 0)  # Starting position (x, y)
 
     def move(self, direction, grid_width, grid_height):
@@ -54,9 +65,9 @@ class Tetromino:
     def get_blocks(self):
         """
         Get the current blocks adjusted for its position.
-
+        
         Returns:
-            list: The adjusted block positions and the color.
+            list: The adjusted block positions.
         """
         x, y = self.position
-        return [(x + bx, y + by, self.color) for bx, by in self.blocks]
+        return [(x + bx, y + by) for bx, by in self.blocks]

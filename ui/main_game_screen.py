@@ -18,7 +18,7 @@ class MainGameScreen:
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.cell_size = cell_size
-        self.screen = pygame.display.set_mode((grid_width * cell_size, grid_height * cell_size))
+        self.screen = pygame.display.set_mode((grid_width * cell_size + 200, grid_height * cell_size))  # Add space for the control panel
         pygame.display.set_caption("Tetris")
 
     def draw_grid(self, grid):
@@ -32,9 +32,10 @@ class MainGameScreen:
             for x in range(grid.width):
                 rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                 if grid.grid[y][x] == 0:
-                    pygame.draw.rect(self.screen, (50, 50, 50), rect, 1)  # Draw empty cell with border
+                    pygame.draw.rect(self.screen, (0, 0, 0), rect)  # Draw empty cell
                 else:
                     pygame.draw.rect(self.screen, (255, 255, 255), rect)  # Draw filled cell
+                pygame.draw.rect(self.screen, (50, 50, 50), rect, 1)  # Draw grid lines on top of the cells
 
     def draw_tetromino(self, tetromino):
         """
@@ -43,10 +44,10 @@ class MainGameScreen:
         Parameters:
             tetromino (Tetromino): The current tetromino.
         """
-        for x, y, color in tetromino.get_blocks():
+        for x, y in tetromino.get_blocks():
             rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-            pygame.draw.rect(self.screen, color, rect)
-            pygame.draw.rect(self.screen, (50, 50, 50), rect, 1)  # Add border to tetromino blocks
+            pygame.draw.rect(self.screen, tetromino.color, rect)
+            pygame.draw.rect(self.screen, (50, 50, 50), rect, 1)  # Draw grid lines on top of the tetromino blocks
 
     def update(self, grid, tetromino):
         """
@@ -56,7 +57,7 @@ class MainGameScreen:
             grid (Grid): The game grid.
             tetromino (Tetromino): The current tetromino.
         """
-        self.screen.fill((0, 0, 0))  # Clear screen
+        self.screen.fill((0, 0, 0))
         self.draw_grid(grid)
         self.draw_tetromino(tetromino)
         pygame.display.flip()
