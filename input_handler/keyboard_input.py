@@ -16,6 +16,20 @@ class KeyboardInput:
             'drop': pygame.K_SPACE
         }
         self.pressed_keys = set()  # Set to keep track of pressed keys
+        self.last_action_time = {
+            'left': 0,
+            'right': 0,
+            'down': 0,
+            'rotate': 0,
+            'drop': 0
+        }
+        self.cooldown = {
+            'left': 200,  # Cooldown in milliseconds
+            'right': 200,
+            'down': 100,
+            'rotate': 300,
+            'drop': 500
+        }
 
     def handle_event(self, event):
         """
@@ -30,17 +44,24 @@ class KeyboardInput:
             if event.key in self.keys.values():
                 self.pressed_keys.discard(event.key)
 
-    def is_key_pressed(self, action):
+    def is_key_pressed(self, action, current_time):
         """
-        Check if a specific action is currently being pressed.
+        Check if a specific action is currently being pressed and handle cooldown.
 
         Parameters:
             action (str): The action to check ('left', 'right', 'down', 'rotate', 'drop').
+            current_time (int): The current time in milliseconds.
 
         Returns:
-            bool: True if the key for the action is pressed, False otherwise.
+            bool: True if the key for the action is pressed and cooldown has elapsed, False otherwise.
         """
-        return self.keys.get(action) in self.pressed_keys
+        key_code = self.keys.get(action)
+        if key_code in self.pressed_keys:
+            elapsed_time = current_time - self.last_action_time[action]
+            if elapsed_time >= self.cooldown[action]:
+                self.last_action_time[action] = current_time
+                return True
+        return False
 
     def __del__(self):
         """

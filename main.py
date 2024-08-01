@@ -30,6 +30,8 @@ def main():
     fall_time = pygame.time.get_ticks()
 
     while True:
+        current_time = pygame.time.get_ticks()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -41,20 +43,19 @@ def main():
                     game_state = 'paused' if game_state == 'playing' else 'playing'
                     game.toggle_pause()
 
-            if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-                keyboard_input.handle_event(event)  # Update keyboard input state
+            keyboard_input.handle_event(event)  # Update keyboard input state
 
         if game_state == 'playing':
-            # Update game state based on keyboard input
-            if keyboard_input.is_key_pressed('left'):
+            # Update game state based on keyboard input with cooldowns
+            if keyboard_input.is_key_pressed('left', current_time):
                 game.tetromino.move('left', game.grid.width, game.grid.height)
-            if keyboard_input.is_key_pressed('right'):
+            if keyboard_input.is_key_pressed('right', current_time):
                 game.tetromino.move('right', game.grid.width, game.grid.height)
-            if keyboard_input.is_key_pressed('down'):
+            if keyboard_input.is_key_pressed('down', current_time):
                 game.tetromino.move('down', game.grid.width, game.grid.height)
-            if keyboard_input.is_key_pressed('rotate'):
+            if keyboard_input.is_key_pressed('rotate', current_time):
                 game.tetromino.rotate(game.grid.width, game.grid.height)
-            if keyboard_input.is_key_pressed('drop'):
+            if keyboard_input.is_key_pressed('drop', current_time):
                 while game.grid.is_valid_position(game.tetromino):
                     game.tetromino.move('down', game.grid.width, game.grid.height)
                 game.grid.place_tetromino(game.tetromino)
@@ -65,7 +66,6 @@ def main():
                     game_state = 'game_over'
 
             # Automatic tetromino fall
-            current_time = pygame.time.get_ticks()
             if (current_time - fall_time) / 1000 >= FALL_SPEED:
                 game.tetromino.move('down', game.grid.width, game.grid.height)
                 if not game.grid.is_valid_position(game.tetromino):
