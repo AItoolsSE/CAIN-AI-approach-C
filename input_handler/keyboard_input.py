@@ -1,5 +1,3 @@
-# input_handler/keyboard_input.py
-
 import pygame
 
 class KeyboardInput:
@@ -7,7 +5,6 @@ class KeyboardInput:
         """
         Initialize the KeyboardInput class and set up key mappings.
         """
-        pygame.init()  # Initialize Pygame
         self.keys = {
             'left': pygame.K_LEFT,
             'right': pygame.K_RIGHT,
@@ -17,11 +14,14 @@ class KeyboardInput:
         }
         self.pressed_keys = set()  # Set to keep track of pressed keys
 
-    def handle_events(self):
+    def handle_events(self, events):
         """
         Handle keyboard events and update the state of pressed keys.
+
+        Parameters:
+            events (list): List of Pygame events.
         """
-        for event in pygame.event.get():
+        for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key in self.keys.values():
                     self.pressed_keys.add(event.key)
@@ -40,9 +40,3 @@ class KeyboardInput:
             bool: True if the key for the action is pressed, False otherwise.
         """
         return self.keys.get(action) in self.pressed_keys
-
-    def __del__(self):
-        """
-        Clean up resources when the KeyboardInput object is destroyed.
-        """
-        pygame.quit()  # Quit Pygame

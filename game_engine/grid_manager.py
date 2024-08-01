@@ -1,16 +1,18 @@
-# game_engine/grid_manager.py
-
 class Grid:
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.grid = [[0] * width for _ in range(height)]
 
+    def is_valid_position(self, x, y):
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return False
+        return self.grid[y][x] == 0
+
     def place_tetromino(self, tetromino):
         blocks = tetromino.get_blocks()
-        for x, y, _ in blocks:
+        for x, y in blocks:
             if x < 0 or x >= self.width or y < 0 or y >= self.height:
-                print(f"Attempting to place tetromino out of bounds: ({x}, {y})")
                 raise ValueError("Tetromino placement out of bounds.")
             self.grid[y][x] = 1
 
@@ -23,20 +25,3 @@ class Grid:
 
     def is_game_over(self):
         return any(self.grid[0][x] == 1 for x in range(self.width))
-
-    def is_valid_position(self, tetromino):
-        """
-        Check if the tetromino is in a valid position on the grid.
-
-        Parameters:
-            tetromino (Tetromino): The tetromino to check.
-
-        Returns:
-            bool: True if the tetromino is in a valid position, False otherwise.
-        """
-        for x, y, _ in tetromino.get_blocks():
-            if x < 0 or x >= self.width or y < 0 or y >= self.height:
-                return False
-            if self.grid[y][x] == 1:
-                return False
-        return True

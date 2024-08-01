@@ -1,5 +1,3 @@
-# main.py
-
 import pygame
 import sys
 from game_engine.grid_manager import Grid
@@ -15,7 +13,7 @@ GRID_WIDTH = 10
 GRID_HEIGHT = 20
 CELL_SIZE = 30
 FPS = 30
-CONTROL_PANEL_WIDTH = 200  # Add control panel width
+DROP_INTERVAL = 500  # Time in milliseconds between automatic drops
 
 def main():
     try:
@@ -30,11 +28,13 @@ def main():
 
         # Set up the clock for managing frame rate
         clock = pygame.time.Clock()
+        last_drop_time = pygame.time.get_ticks()
 
         while True:
             try:
                 # Handle events
-                for event in pygame.event.get():
+                events = pygame.event.get()
+                for event in events:
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
@@ -42,12 +42,30 @@ def main():
                     # Handle control panel events
                     control_panel.handle_events(event)
 
+                # Handle keyboard input
+                keyboard_input.handle_events(events)
+
+                if game.is_paused:
+                    continue
+
+                # Automatic drop
+                current_time = pygame.time.get_ticks()
+                if current_time - last_drop_time > DROP_INTERVAL:
+                    game.tetromino.move('down', game.grid)
+                    last_drop_time = current_time
+
                 # Update game state
                 game.update(keyboard_input)
 
+                # Check for game over
+                if game.grid.is_game_over():
+                    print("Game Over")
+                    pygame.quit()
+                    sys.exit()
+
                 # Update display
                 game_screen.update(game.grid, game.tetromino)
-                control_panel.update()
+                control_panel.update(game.is_paused)
 
                 # Draw everything
                 game_screen.screen.fill((0, 0, 0))  # Clear screen

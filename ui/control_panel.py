@@ -1,5 +1,4 @@
 # ui/control_panel.py
-
 import pygame
 from pygame.locals import *
 
@@ -10,25 +9,30 @@ class ControlPanel(pygame.sprite.Sprite):
         
         :param game: The main game instance, used to interact with the game state.
         :param cell_size: The size of each cell in the grid.
-        :param grid_width: The width of the game grid in cells.
+        :param grid_width: The width of the game grid.
         """
         super().__init__()
         self.game = game
         self.cell_size = cell_size
         self.grid_width = grid_width
-        self.panel_width = 200
         self.font = pygame.font.Font(None, 36)
         self.create_buttons()
         self.create_labels()
+        self.buttons = pygame.sprite.Group(
+            self.start_button, 
+            self.pause_button, 
+            self.settings_button, 
+            self.high_scores_button
+        )
 
     def create_buttons(self):
         """
         Create and position buttons on the control panel.
         """
-        self.start_button = self.create_button((self.panel_width - 20, 50), (0, 255, 0), (self.grid_width * self.cell_size + 10, 10), "Start")
-        self.pause_button = self.create_button((self.panel_width - 20, 50), (255, 255, 0), (self.grid_width * self.cell_size + 10, 70), "Pause")
-        self.settings_button = self.create_button((self.panel_width - 20, 50), (0, 0, 255), (self.grid_width * self.cell_size + 10, 130), "Settings")
-        self.high_scores_button = self.create_button((self.panel_width - 20, 50), (255, 0, 0), (self.grid_width * self.cell_size + 10, 190), "High Scores")
+        self.start_button = self.create_button((150, 50), (0, 255, 0), (self.grid_width * self.cell_size + 10, 10), "Start")
+        self.pause_button = self.create_button((150, 50), (255, 255, 0), (self.grid_width * self.cell_size + 10, 70), "Pause")
+        self.settings_button = self.create_button((150, 50), (0, 0, 255), (self.grid_width * self.cell_size + 10, 130), "Settings")
+        self.high_scores_button = self.create_button((150, 50), (255, 0, 0), (self.grid_width * self.cell_size + 10, 190), "High Scores")
 
     def create_button(self, size, color, position, text):
         """
@@ -44,30 +48,22 @@ class ControlPanel(pygame.sprite.Sprite):
         button.image = pygame.Surface(size)
         button.image.fill(color)
         button.rect = button.image.get_rect(topleft=position)
-        button.text = text  # Store the button text
         
         # Add text to button
-        self.render_button_text(button)
+        text_surf = self.font.render(text, True, (255, 255, 255))
+        text_rect = text_surf.get_rect(center=button.rect.center)
+        button.image.blit(text_surf, text_rect)
         
         button.default_color = color  # Store the default color
+        button.text = text
         return button
-
-    def render_button_text(self, button):
-        """
-        Render the text on the button.
-
-        :param button: The button sprite to render text on.
-        """
-        text_surf = self.font.render(button.text, True, (255, 255, 255))
-        text_rect = text_surf.get_rect(center=(button.rect.width // 2, button.rect.height // 2))
-        button.image.blit(text_surf, text_rect)
 
     def create_labels(self):
         """
         Create and position labels on the control panel.
         """
         self.score_label = self.create_label('Score: 0', (self.grid_width * self.cell_size + 10, 250))
-        self.status_label = self.create_label('Game Status: Running', (self.grid_width * self.cell_size + 10, 290))
+        self.status_label = self.create_label('Game Status: Running', (self.grid_width * self.cell_size + 10, 310))
 
     def create_label(self, text, position):
         """
@@ -99,12 +95,14 @@ class ControlPanel(pygame.sprite.Sprite):
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
                 self.game.view_high_scores()
 
-    def update(self):
+    def update(self, is_paused):
         """
         Update the control panel display based on game state.
+        
+        :param is_paused: Boolean indicating if the game is paused.
         """
         self.score_label.image = self.font.render(f'Score: {self.game.get_score()}', True, (255, 255, 255))
-        game_status = 'Paused' if self.game.is_paused else 'Running'
+        game_status = 'Paused' if is_paused else 'Running'
         self.status_label.image = self.font.render(f'Game Status: {game_status}', True, (255, 255, 255))
 
     def draw(self, surface):
@@ -115,10 +113,13 @@ class ControlPanel(pygame.sprite.Sprite):
         """
         mouse_pos = pygame.mouse.get_pos()
         for button in [self.start_button, self.pause_button, self.settings_button, self.high_scores_button]:
-            button.image.fill(button.default_color)  # Reset button color
             if button.rect.collidepoint(mouse_pos):
                 button.image.fill((200, 200, 200))  # Highlight color
-            self.render_button_text(button)  # Ensure text is rendered on top
+            else:
+                button.image.fill(button.default_color)  # Default color
+            text_surf = self.font.render(button.text, True, (255, 255, 255))
+            text_rect = text_surf.get_rect(center=button.rect.center)
+            button.image.blit(text_surf, text_rect)
             surface.blit(button.image, button.rect)
         surface.blit(self.score_label.image, self.score_label.rect)
         surface.blit(self.status_label.image, self.status_label.rect)

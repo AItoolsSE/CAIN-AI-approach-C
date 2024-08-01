@@ -1,5 +1,3 @@
-# game_engine/game.py
-
 from game_engine.grid_manager import Grid
 from game_engine.tetromino_manager import Tetromino
 from game_engine.score_manager import ScoreManager
@@ -29,33 +27,23 @@ class Game:
         if self.is_paused or self.game_over:
             return
         
+        # Handle keyboard input
         if keyboard_input.is_key_pressed('left'):
-            self.tetromino.move('left', self.grid.width, self.grid.height)
-            if not self.grid.is_valid_position(self.tetromino):
-                self.tetromino.move('right', self.grid.width, self.grid.height)  # Move back
-
+            self.tetromino.move('left', self.grid)
         if keyboard_input.is_key_pressed('right'):
-            self.tetromino.move('right', self.grid.width, self.grid.height)
-            if not self.grid.is_valid_position(self.tetromino):
-                self.tetromino.move('left', self.grid.width, self.grid.height)  # Move back
-
+            self.tetromino.move('right', self.grid)
         if keyboard_input.is_key_pressed('down'):
-            self.tetromino.move('down', self.grid.width, self.grid.height)
-            if not self.grid.is_valid_position(self.tetromino):
-                self.tetromino.move('up', self.grid.width, self.grid.height)  # Move back
-
+            self.tetromino.move('down', self.grid)
         if keyboard_input.is_key_pressed('rotate'):
-            self.tetromino.rotate(self.grid.width, self.grid.height)
-            if not self.grid.is_valid_position(self.tetromino):
-                self.tetromino.rotate(self.grid.width, self.grid.height)  # Rotate back
-
+            self.tetromino.rotate(self.grid)
         if keyboard_input.is_key_pressed('drop'):
-            while self.grid.is_valid_position(self.tetromino):
-                self.tetromino.move('down', self.grid.width, self.grid.height)
-            self.tetromino.move('up', self.grid.width, self.grid.height)  # Move back
-            self.grid.place_tetromino(self.tetromino)
+            # Move Tetromino down until it cannot move further
+            while not self.grid.place_tetromino(self.tetromino):
+                self.tetromino.move('down', self.grid)
             rows_cleared = self.grid.clear_rows()
             self.score_manager.add_points(rows_cleared)
             self.tetromino = Tetromino()  # Generate a new Tetromino
-            if not self.grid.is_valid_position(self.tetromino):
-                self.game_over = True
+
+        # Check for game over
+        if self.grid.is_game_over():
+            self.game_over = True
