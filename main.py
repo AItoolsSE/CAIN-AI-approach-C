@@ -1,11 +1,9 @@
 import pygame
 import sys
-from game_engine.grid_manager import Grid
-from game_engine.tetromino_manager import Tetromino
+from game_engine.game import Game
 from input_handler.keyboard_input import KeyboardInput
 from ui.main_game_screen import MainGameScreen
 from ui.control_panel import ControlPanel
-from game_engine.score_manager import ScoreManager
 
 # Game settings
 GRID_WIDTH = 10
@@ -19,18 +17,18 @@ def main():
         pygame.init()
 
         # Create game objects
-        grid = Grid(GRID_WIDTH, GRID_HEIGHT)
-        tetromino = Tetromino()
-        score_manager = ScoreManager()
+        game = Game(GRID_WIDTH, GRID_HEIGHT)
         keyboard_input = KeyboardInput()
         game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE)
-        control_panel = ControlPanel(score_manager)
+        control_panel = ControlPanel(game)
 
         # Set up the clock for managing frame rate
         clock = pygame.time.Clock()
 
         # Game state variables
         game_state = 'playing'  # Other states could be 'paused' or 'game_over'
+        fall_time = 0
+        fall_speed = 0.5  # Tetromino falls every 0.5 seconds
 
         while True:
             try:
@@ -39,54 +37,45 @@ def main():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            game_state = 'paused' if game_state == 'playing' else 'playing'
+                            game.toggle_pause()
 
                     # Handle control panel events
-                    control_panel.handle_events(event)
-
-                    # Toggle game state with Esc key
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                        if game_state == 'playing':
-                            game_state = 'paused'
-                        elif game_state == 'paused':
-                            game_state = 'playing'
+                    if game_state == 'paused':
+                        control_panel.handle_events(event)
 
                 if game_state == 'playing':
                     # Handle keyboard input
                     keyboard_input.handle_events()
 
-                    # Game logic
-                    if keyboard_input.is_key_pressed('left'):
-                        tetromino.move('left', GRID_WIDTH, GRID_HEIGHT)
-                    if keyboard_input.is_key_pressed('right'):
-                        tetromino.move('right', GRID_WIDTH, GRID_HEIGHT)
-                    if keyboard_input.is_key_pressed('down'):
-                        tetromino.move('down', GRID_WIDTH, GRID_HEIGHT)
-                    if keyboard_input.is_key_pressed('rotate'):
-                        tetromino.rotate(GRID_WIDTH, GRID_HEIGHT)
-                    if keyboard_input.is_key_pressed('drop'):
-                        # Move Tetromino down until it cannot move further
-                        while not grid.place_tetromino(tetromino):
-                            tetromino.move('down', GRID_WIDTH, GRID_HEIGHT)
-                        rows_cleared = grid.clear_rows()
-                        score_manager.add_points(rows_cleared)
-                        tetromino = Tetromino()  # Generate a new Tetromino
+                    # Update game state
+                    game.update(keyboard_input)
+
+                    # Automatic tetromino fall
+                    fall_time += clock.get_rawtime()
+                    if fall_time / 1000 >= fall_speed:
+                        game.tetromino.move('down', game.grid.width, game.grid.height)
+                        fall_time = 0
 
                     # Check for game over
-                    if grid.is_game_over():
+                    if game.grid.is_game_over():
                         game_state = 'game_over'
 
                 # Update display
-                game_screen.update(grid, tetromino)
-                control_panel.update(game_state == 'paused')
+                game_screen.update(game.grid, game.tetromino)
 
                 # Draw everything
                 game_screen.screen.fill((0, 0, 0))  # Clear screen
-                game_screen.draw_grid(grid)
-                game_screen.draw_tetromino(tetromino)
+                game_screen.draw_grid(game.grid)
+                game_screen.draw_tetromino(game.tetromino)
 
-                # Only draw the control panel if the game is paused
                 if game_state == 'paused':
+                    control_panel.update(is_paused=True)
                     control_panel.draw(game_screen.screen)
+                else:
+                    control_panel.update(is_paused=False)
 
                 # Update the display
                 pygame.display.flip()
