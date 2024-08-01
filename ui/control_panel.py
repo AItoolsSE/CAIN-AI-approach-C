@@ -92,9 +92,11 @@ class ControlPanel(pygame.sprite.Sprite):
             elif self.pause_button.rect.collidepoint(mouse_pos):
                 self.game.toggle_pause()
             elif self.settings_button.rect.collidepoint(mouse_pos):
-                self.game.open_settings()
+                # Implement settings functionality if needed
+                pass
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
-                self.game.view_high_scores()
+                # Implement high scores functionality if needed
+                pass
 
     def update(self, is_paused):
         """

@@ -17,17 +17,18 @@ class KeyboardInput:
         }
         self.pressed_keys = set()  # Set to keep track of pressed keys
 
-    def handle_events(self):
+    def handle_event(self, event):
         """
-        Handle keyboard events and update the state of pressed keys.
+        Handle individual keyboard events to update pressed_keys.
+        
+        :param event: The pygame event to handle.
         """
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key in self.keys.values():
-                    self.pressed_keys.add(event.key)
-            elif event.type == pygame.KEYUP:
-                if event.key in self.keys.values():
-                    self.pressed_keys.discard(event.key)
+        if event.type == pygame.KEYDOWN:
+            if event.key in self.keys.values():
+                self.pressed_keys.add(event.key)
+        elif event.type == pygame.KEYUP:
+            if event.key in self.keys.values():
+                self.pressed_keys.discard(event.key)
 
     def is_key_pressed(self, action):
         """
