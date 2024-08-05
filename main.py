@@ -1,5 +1,3 @@
-# main.py
-
 import pygame
 import sys
 from game_engine.grid_manager import Grid
@@ -19,24 +17,32 @@ DROP_INTERVAL = 750  # Time in milliseconds between automatic drops
 
 def main():
     try:
+        # Initialize pygame
         pygame.init()
+
+        # Create game objects
         game = Game(GRID_WIDTH, GRID_HEIGHT)
         keyboard_input = KeyboardInput()
         game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE)
         control_panel = ControlPanel(game, CELL_SIZE, GRID_WIDTH)
 
+        # Set up the clock for managing frame rate
         clock = pygame.time.Clock()
         last_drop_time = pygame.time.get_ticks()
 
         while True:
             try:
+                # Handle events
                 events = pygame.event.get()
                 for event in events:
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
+
+                    # Handle control panel events
                     control_panel.handle_events(event)
 
+                # Handle keyboard input
                 keyboard_input.handle_events(events)
 
                 if game.is_paused:
@@ -44,13 +50,15 @@ def main():
 
                 current_time = pygame.time.get_ticks()
 
+                # Automatic drop
                 if current_time - last_drop_time > DROP_INTERVAL:
                     if not game.tetromino.move('down', game.grid):
                         game.grid.place_tetromino(game.tetromino)
                         game.grid.clear_rows()
-                        game.tetromino = Tetromino()
+                        game.tetromino = Tetromino()  # Generate a new Tetromino
                     last_drop_time = current_time
 
+                # Controlled key press handling
                 if keyboard_input.is_key_pressed('left'):
                     game.tetromino.move('left', game.grid)
                 if keyboard_input.is_key_pressed('right'):
@@ -59,7 +67,7 @@ def main():
                     if not game.tetromino.move('down', game.grid):
                         game.grid.place_tetromino(game.tetromino)
                         game.grid.clear_rows()
-                        game.tetromino = Tetromino()
+                        game.tetromino = Tetromino()  # Generate a new Tetromino
                 if keyboard_input.is_key_pressed('rotate'):
                     game.tetromino.rotate(game.grid)
                 if keyboard_input.is_key_pressed('drop'):
@@ -67,23 +75,31 @@ def main():
                         pass
                     game.grid.place_tetromino(game.tetromino)
                     game.grid.clear_rows()
-                    game.tetromino = Tetromino()
+                    game.tetromino = Tetromino()  # Generate a new Tetromino
 
+                # Update game state
                 game.update(keyboard_input)
 
+                # Check for game over
                 if game.grid.is_game_over():
                     print("Game Over")
                     pygame.quit()
                     sys.exit()
 
+                # Update display
                 game_screen.update(game.grid, game.tetromino)
                 control_panel.update(game.is_paused)
-                game_screen.screen.fill((0, 0, 0))
+
+                # Draw everything
+                game_screen.screen.fill((0, 0, 0))  # Clear screen
                 game_screen.draw_grid(game.grid)
                 game_screen.draw_tetromino(game.tetromino)
                 control_panel.draw(game_screen.screen)
 
+                # Update the display
                 pygame.display.flip()
+
+                # Cap the frame rate
                 clock.tick(FPS)
 
             except Exception as e:
