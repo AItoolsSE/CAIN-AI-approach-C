@@ -1,3 +1,5 @@
+# game_engine/tetromino_manager.py
+
 import random
 
 class Tetromino:
@@ -35,6 +37,8 @@ class Tetromino:
             self.position = (x + 1, y)
         elif direction == 'down' and all(grid.is_valid_position(bx + x, by + y + 1) for bx, by in self.blocks):
             self.position = (x, y + 1)
+            return True
+        return False
 
     def rotate(self, grid):
         if self.shape != 'O':
@@ -45,3 +49,6 @@ class Tetromino:
     def get_blocks(self):
         x, y = self.position
         return [(x + bx, y + by) for bx, by in self.blocks]
+
+    def get_color(self):
+        return self.color

@@ -1,3 +1,4 @@
+# game.py
 from game_engine.grid_manager import Grid
 from game_engine.tetromino_manager import Tetromino
 from game_engine.score_manager import ScoreManager
@@ -33,16 +34,21 @@ class Game:
         if keyboard_input.is_key_pressed('right'):
             self.tetromino.move('right', self.grid)
         if keyboard_input.is_key_pressed('down'):
-            self.tetromino.move('down', self.grid)
+            if not self.tetromino.move('down', self.grid):
+                self.grid.place_tetromino(self.tetromino)
+                rows_cleared = self.grid.clear_rows()
+                self.score_manager.add_points(rows_cleared)
+                self.tetromino = Tetromino()
         if keyboard_input.is_key_pressed('rotate'):
             self.tetromino.rotate(self.grid)
         if keyboard_input.is_key_pressed('drop'):
             # Move Tetromino down until it cannot move further
-            while not self.grid.place_tetromino(self.tetromino):
-                self.tetromino.move('down', self.grid)
+            while self.tetromino.move('down', self.grid):
+                pass
+            self.grid.place_tetromino(self.tetromino)
             rows_cleared = self.grid.clear_rows()
             self.score_manager.add_points(rows_cleared)
-            self.tetromino = Tetromino()  # Generate a new Tetromino
+            self.tetromino = Tetromino()
 
         # Check for game over
         if self.grid.is_game_over():
