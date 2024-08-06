@@ -5,6 +5,7 @@ from game_engine.tetromino_manager import Tetromino
 from input_handler.keyboard_input import KeyboardInput
 from ui.main_game_screen import MainGameScreen
 from ui.control_panel import ControlPanel
+from ui.game_over_screen import GameOverScreen  # Import GameOverScreen
 from game_engine.score_manager import ScoreManager
 from game_engine.game import Game
 
@@ -25,6 +26,7 @@ def main():
         control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH)
         game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel)
         control_panel.game = game  # Set the game instance in the control panel
+        game_over_screen = GameOverScreen(game_screen.screen.get_width(), game_screen.screen.get_height())  # Initialize GameOverScreen
         keyboard_input = KeyboardInput()
 
         # Set up the clock for managing frame rate
@@ -47,11 +49,28 @@ def main():
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                         game.toggle_pause()
 
+                    if game.game_over:
+                        action = game_over_screen.handle_events(event)
+                        if action == 'restart':
+                            game.start_new_game()
+                            game.game_over = False
+                        elif action == 'exit':
+                            pygame.quit()
+                            sys.exit()
+
+                # If game is over, skip updating game state
+                if game.game_over:
+                    game_over_screen.display(game_screen.screen, game.score_manager.get_score())
+                    pygame.display.flip()  # Update the display
+                    continue
+
                 # Handle keyboard input
                 keyboard_input.handle_events(events)
 
                 if game.is_paused:
                     control_panel.update()  # Update the control panel
+                    control_panel.draw(game_screen.screen)  # Draw the control panel
+                    pygame.display.flip()  # Update the display
                     continue
 
                 current_time = pygame.time.get_ticks()
@@ -64,6 +83,8 @@ def main():
                         game.score_manager.add_points(rows_cleared)
                         control_panel.update()  # Update the control panel
                         game.tetromino = Tetromino()
+                        if game.grid.is_game_over():
+                            game.game_over = True
                     last_drop_time = current_time
 
                 # Controlled key press handling
@@ -78,6 +99,8 @@ def main():
                         game.score_manager.add_points(rows_cleared)
                         control_panel.update()  # Update the control panel
                         game.tetromino = Tetromino()
+                        if game.grid.is_game_over():
+                            game.game_over = True
                 if keyboard_input.is_key_pressed('rotate'):
                     game.tetromino.rotate(game.grid)
                 if keyboard_input.is_key_pressed('drop'):
@@ -88,15 +111,15 @@ def main():
                     game.score_manager.add_points(rows_cleared)
                     control_panel.update()  # Update the control panel
                     game.tetromino = Tetromino()
+                    if game.grid.is_game_over():
+                        game.game_over = True
 
                 # Update game state
                 game.update(keyboard_input)
 
                 # Check for game over
                 if game.grid.is_game_over():
-                    print("Game Over")
-                    pygame.quit()
-                    sys.exit()
+                    game.game_over = True
 
                 # Update display
                 game_screen.update(game.grid, game.tetromino)
@@ -106,7 +129,10 @@ def main():
                 game_screen.screen.fill((0, 0, 0))  # Clear screen
                 game_screen.draw_grid(game.grid)
                 game_screen.draw_tetromino(game.tetromino)
-                control_panel.draw(game_screen.screen)
+                control_panel.draw(game_screen.screen)  # Draw the control panel
+
+                if game.game_over:
+                    game_over_screen.display(game_screen.screen, game.score_manager.get_score())
 
                 # Update the display
                 pygame.display.flip()

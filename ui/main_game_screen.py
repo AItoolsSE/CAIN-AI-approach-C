@@ -33,7 +33,7 @@ class MainGameScreen:
         self.screen.fill((0, 0, 0))
         self.draw_grid(grid)
         self.draw_tetromino(tetromino)
-        pygame.display.flip()
+
 
     def quit(self):
         pygame.quit()
