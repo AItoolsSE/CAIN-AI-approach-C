@@ -8,7 +8,6 @@ class ControlPanel(pygame.sprite.Sprite):
         self.cell_size = cell_size
         self.grid_width = grid_width
         self.font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)  # Smaller font for the game status
         self.create_buttons()
         self.create_labels()
         self.buttons = pygame.sprite.Group(
@@ -40,7 +39,6 @@ class ControlPanel(pygame.sprite.Sprite):
 
     def create_labels(self):
         self.score_label = self.create_label('Score: 0', (self.grid_width * self.cell_size + 10, 250), self.font)
-        self.status_label = self.create_label('Game Status: Running', (self.grid_width * self.cell_size + 10, 310), self.small_font)
 
     def create_label(self, text, position, font):
         label = pygame.sprite.Sprite()
@@ -60,10 +58,8 @@ class ControlPanel(pygame.sprite.Sprite):
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
                 self.game.view_high_scores()
 
-    def update(self, is_paused):
+    def update(self):
         self.score_label.image = self.font.render(f'Score: {self.game.get_score()}', True, (255, 255, 255))
-        game_status = 'Paused' if is_paused else 'Running'
-        self.status_label.image = self.small_font.render(f'Game Status: {game_status}', True, (255, 255, 255))
 
     def draw(self, surface):
         mouse_pos = pygame.mouse.get_pos()
@@ -75,4 +71,3 @@ class ControlPanel(pygame.sprite.Sprite):
             surface.blit(button.image, button.rect)
             surface.blit(button.text_surf, button.text_rect)
         surface.blit(self.score_label.image, self.score_label.rect)
-        surface.blit(self.status_label.image, self.status_label.rect)

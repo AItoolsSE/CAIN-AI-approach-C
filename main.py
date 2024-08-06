@@ -21,10 +21,11 @@ def main():
         pygame.init()
 
         # Create game objects
-        game = Game(GRID_WIDTH, GRID_HEIGHT)
-        keyboard_input = KeyboardInput()
         game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE)
-        control_panel = ControlPanel(game, CELL_SIZE, GRID_WIDTH)
+        control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH)
+        game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel)
+        control_panel.game = game  # Set the game instance in the control panel
+        keyboard_input = KeyboardInput()
 
         # Set up the clock for managing frame rate
         clock = pygame.time.Clock()
@@ -42,10 +43,15 @@ def main():
                     # Handle control panel events
                     control_panel.handle_events(event)
 
+                    # Handle pause event
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                        game.toggle_pause()
+
                 # Handle keyboard input
                 keyboard_input.handle_events(events)
 
                 if game.is_paused:
+                    control_panel.update()  # Update the control panel
                     continue
 
                 current_time = pygame.time.get_ticks()
@@ -54,8 +60,10 @@ def main():
                 if current_time - last_drop_time > DROP_INTERVAL:
                     if not game.tetromino.move('down', game.grid):
                         game.grid.place_tetromino(game.tetromino)
-                        game.grid.clear_rows()
-                        game.tetromino = Tetromino()  # Generate a new Tetromino
+                        rows_cleared = game.grid.clear_rows()
+                        game.score_manager.add_points(rows_cleared)
+                        control_panel.update()  # Update the control panel
+                        game.tetromino = Tetromino()
                     last_drop_time = current_time
 
                 # Controlled key press handling
@@ -66,16 +74,20 @@ def main():
                 if keyboard_input.is_key_pressed('down'):
                     if not game.tetromino.move('down', game.grid):
                         game.grid.place_tetromino(game.tetromino)
-                        game.grid.clear_rows()
-                        game.tetromino = Tetromino()  # Generate a new Tetromino
+                        rows_cleared = game.grid.clear_rows()
+                        game.score_manager.add_points(rows_cleared)
+                        control_panel.update()  # Update the control panel
+                        game.tetromino = Tetromino()
                 if keyboard_input.is_key_pressed('rotate'):
                     game.tetromino.rotate(game.grid)
                 if keyboard_input.is_key_pressed('drop'):
                     while game.tetromino.move('down', game.grid):
                         pass
                     game.grid.place_tetromino(game.tetromino)
-                    game.grid.clear_rows()
-                    game.tetromino = Tetromino()  # Generate a new Tetromino
+                    rows_cleared = game.grid.clear_rows()
+                    game.score_manager.add_points(rows_cleared)
+                    control_panel.update()  # Update the control panel
+                    game.tetromino = Tetromino()
 
                 # Update game state
                 game.update(keyboard_input)
@@ -88,7 +100,7 @@ def main():
 
                 # Update display
                 game_screen.update(game.grid, game.tetromino)
-                control_panel.update(game.is_paused)
+                control_panel.update()  # Update the control panel
 
                 # Draw everything
                 game_screen.screen.fill((0, 0, 0))  # Clear screen

@@ -1,15 +1,15 @@
-# game.py
 from game_engine.grid_manager import Grid
 from game_engine.tetromino_manager import Tetromino
 from game_engine.score_manager import ScoreManager
 
 class Game:
-    def __init__(self, grid_width, grid_height):
+    def __init__(self, grid_width, grid_height, control_panel):
         self.grid = Grid(grid_width, grid_height)
         self.tetromino = Tetromino()
         self.score_manager = ScoreManager()
         self.is_paused = False
         self.game_over = False
+        self.control_panel = control_panel
 
     def start_new_game(self):
         self.grid = Grid(self.grid.width, self.grid.height)
@@ -17,9 +17,11 @@ class Game:
         self.score_manager = ScoreManager()
         self.is_paused = False
         self.game_over = False
+        self.control_panel.update()  # Update control panel
 
     def toggle_pause(self):
         self.is_paused = not self.is_paused
+        self.control_panel.update()  # Update control panel
 
     def get_score(self):
         return self.score_manager.get_score()
@@ -38,6 +40,7 @@ class Game:
                 self.grid.place_tetromino(self.tetromino)
                 rows_cleared = self.grid.clear_rows()
                 self.score_manager.add_points(rows_cleared)
+                self.control_panel.update()  # Update control panel
                 self.tetromino = Tetromino()
         if keyboard_input.is_key_pressed('rotate'):
             self.tetromino.rotate(self.grid)
@@ -48,6 +51,7 @@ class Game:
             self.grid.place_tetromino(self.tetromino)
             rows_cleared = self.grid.clear_rows()
             self.score_manager.add_points(rows_cleared)
+            self.control_panel.update()  # Update control panel
             self.tetromino = Tetromino()
 
         # Check for game over
