@@ -1,12 +1,25 @@
+dist: bionic  # Use a more recent Ubuntu distribution for better stability
 language: python
 python:
-  - "3.8"  # Specify the Python version you want to use
+  - "3.10"
 
-# Command to install dependencies
+# Caching to speed up build times
+cache:
+  pip: true
+
+# Command to install dependencies with retry logic
 install:
-  - pip install -r requirements.txt
+  - pip install --retry 5 -r requirements.txt
 
-# Command to run tests
+# Command to run tests and linting
 script:
-  - pytest  # Run your test suite
-  - flake8 .  # Lint your code (optional)
+  - pytest
+  - flake8 .
+
+# Notifications (optional)
+notifications:
+  email:
+    recipients:
+      - ga475@cam.ac.uk
+    on_success: never
+    on_failure: always
