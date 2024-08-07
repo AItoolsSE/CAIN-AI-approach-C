@@ -1,3 +1,5 @@
+#ui/game_over_screen
+
 import pygame
 
 class GameOverScreen:

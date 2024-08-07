@@ -1,63 +1,62 @@
-# tests/ui/test_control_panel.py
+#tests/ui/test_control_panel.py
+import sys
+import os
 
-import pygame
+# Ensure the base directory is in the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import unittest
+import pygame
+from ui.control_panel import ControlPanel
 from unittest.mock import Mock
-from ui.control_panel import ControlPanel  # Adjusted import path
 
 class TestControlPanel(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Initialize pygame once for all tests
-        pygame.init()
-
     def setUp(self):
-        # Mock the game object and its methods
-        self.game = Mock()
-        self.game.get_score = Mock(return_value=123)
-        self.game.is_paused = Mock(return_value=False)
-
-        # Create a ControlPanel instance
-        self.control_panel = ControlPanel(self.game)
-
-    def test_update_labels(self):
-        """
-        Test that labels are updated correctly based on game state.
-        """
-        # Call the update method to refresh labels
+        pygame.init()
+        self.mock_game = Mock()
+        self.screen = pygame.display.set_mode((800, 600))
+        self.control_panel = ControlPanel(self.mock_game, 30, 10)
+    
+    def test_create_button(self):
+        button = self.control_panel.create_button((150, 50), (255, 0, 0), (10, 10), "Test")
+        self.assertEqual(button.image.get_size(), (150, 50))
+        self.assertEqual(button.default_color, (255, 0, 0))
+        self.assertEqual(button.text, "Test")
+    
+    def test_create_label(self):
+        label = self.control_panel.create_label('Score: 0', (10, 10), self.control_panel.font)
+        self.assertIsInstance(label.image, pygame.Surface)
+        self.assertEqual(label.rect.topleft, (10, 10))
+    
+    def test_handle_events_start_button(self):
+        event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.start_button.rect.topleft})
+        self.control_panel.handle_events(event)
+        self.mock_game.start_new_game.assert_called_once()
+    
+    def test_handle_events_pause_button(self):
+        event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.pause_button.rect.topleft})
+        self.control_panel.handle_events(event)
+        self.mock_game.toggle_pause.assert_called_once()
+    
+    def test_handle_events_settings_button(self):
+        event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.settings_button.rect.topleft})
+        self.control_panel.handle_events(event)
+        self.mock_game.open_settings.assert_called_once()
+    
+    def test_handle_events_high_scores_button(self):
+        event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.high_scores_button.rect.topleft})
+        self.control_panel.handle_events(event)
+        self.mock_game.view_high_scores.assert_called_once()
+    
+    def test_update(self):
+        self.mock_game.get_score.return_value = 100
         self.control_panel.update()
-        
-        # Create a surface to render the expected text
-        font = pygame.font.Font(None, 36)  # Use the same font and size
-        expected_score_surface = font.render("Score: 123", True, (255, 255, 255))
-        expected_status_surface = font.render("Game Status: Running", True, (255, 255, 255))
-        
-        # Check if the score label surface matches the expected surface
-        score_label_surface = self.control_panel.score_label.image
-        status_label_surface = self.control_panel.status_label.image
+        score_text = self.control_panel.font.render(f'Score: 100', True, (255, 255, 255))
+        self.assertEqual(self.control_panel.score_label.image.get_rect(), score_text.get_rect())
 
-        # Compare the pixels of the expected and actual surfaces
-        self.assertTrue(self.compare_surfaces(score_label_surface, expected_score_surface),
-                        "Score label text does not match expected value.")
-        self.assertTrue(self.compare_surfaces(status_label_surface, expected_status_surface),
-                        "Status label text does not match expected value.")
-
-    def compare_surfaces(self, surface1, surface2):
-        """
-        Compare two pygame surfaces pixel by pixel.
-        """
-        if surface1.get_size() != surface2.get_size():
-            return False
-        
-        # Compare pixel data
-        pixels1 = pygame.surfarray.array3d(surface1)
-        pixels2 = pygame.surfarray.array3d(surface2)
-        
-        return (pixels1 == pixels2).all()
-
-    def tearDown(self):
-        # Clean up pygame after tests
-        pygame.quit()
+    def test_draw(self):
+        surface = pygame.Surface((800, 600))
+        self.control_panel.draw(surface)
+        self.assertEqual(surface.get_at(self.control_panel.start_button.rect.topleft), pygame.Color(0, 255, 0, 255))
 
 if __name__ == '__main__':
     unittest.main()

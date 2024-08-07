@@ -1,5 +1,10 @@
 # tests/game_engine/test_score_manager.py
 
+import sys
+import os
+
+# Ensure the base directory is in the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import unittest
 from game_engine.score_manager import ScoreManager
 

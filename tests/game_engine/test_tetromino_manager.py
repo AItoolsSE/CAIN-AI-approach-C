@@ -1,7 +1,14 @@
 # tests/game_engine/test_tetromino_manager.py
 
+import sys
+import os
+
+# Ensure the base directory is in the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 import unittest
 from game_engine.tetromino_manager import Tetromino
+from game_engine.grid_manager import Grid
 
 class TestTetrominoManager(unittest.TestCase):
     def test_tetromino_initialization(self):
@@ -11,28 +18,26 @@ class TestTetrominoManager(unittest.TestCase):
 
     def test_tetromino_movement(self):
         tetromino = Tetromino()
-        grid_width = 10
-        grid_height = 20
+        grid = Grid(10, 20)
 
         # Move left
-        tetromino.move('left', grid_width, grid_height)
+        tetromino.move('left', grid)
         self.assertEqual(tetromino.position, (2, 0))
         
         # Move right
-        tetromino.move('right', grid_width, grid_height)
+        tetromino.move('right', grid)
         self.assertEqual(tetromino.position, (3, 0))
 
         # Move down
-        tetromino.move('down', grid_width, grid_height)
+        tetromino.move('down', grid)
         self.assertEqual(tetromino.position, (3, 1))
 
     def test_tetromino_rotation(self):
         tetromino = Tetromino()
-        grid_width = 10
-        grid_height = 20
+        grid = Grid(10, 20)
 
         initial_blocks = tetromino.blocks[:]
-        tetromino.rotate(grid_width, grid_height)
+        tetromino.rotate(grid)
         if tetromino.shape != 'O':
             self.assertNotEqual(tetromino.blocks, initial_blocks)
 

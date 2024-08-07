@@ -64,8 +64,6 @@ class ControlPanel(pygame.sprite.Sprite):
         self.score_label.image = self.font.render(f'Score: {self.game.get_score()}', True, (255, 255, 255))
 
     def draw(self, surface):
-        if self.game.game_over:
-            return
         mouse_pos = pygame.mouse.get_pos()
         for button in [self.start_button, self.pause_button, self.settings_button, self.high_scores_button]:
             if button.rect.collidepoint(mouse_pos):

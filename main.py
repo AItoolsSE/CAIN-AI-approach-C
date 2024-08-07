@@ -1,3 +1,5 @@
+#main.py
+
 import pygame
 import sys
 from game_engine.grid_manager import Grid

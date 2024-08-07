@@ -1,5 +1,4 @@
 import pygame
-import time
 
 class KeyboardInput:
     def __init__(self):
@@ -24,9 +23,13 @@ class KeyboardInput:
         Parameters:
             events (list): List of Pygame events.
         """
+        current_time = pygame.time.get_ticks()
         for event in events:
             if event.type == pygame.KEYDOWN and event.key in self.keys.values():
                 self.pressed_keys.add(event.key)
+                for action, key in self.keys.items():
+                    if key == event.key:
+                        self.last_press_time[action] = current_time  # Update the last press time on key down
             elif event.type == pygame.KEYUP and event.key in self.keys.values():
                 if event.key in self.pressed_keys:
                     self.pressed_keys.remove(event.key)
@@ -43,6 +46,8 @@ class KeyboardInput:
         """
         current_time = pygame.time.get_ticks()
         key = self.keys.get(action)
+        if key is None:
+            return False
         if key in self.pressed_keys and current_time - self.last_press_time[action] > self.cooldown:
             self.last_press_time[action] = current_time
             return True

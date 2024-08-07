@@ -16,9 +16,8 @@ class Grid:
         color = tetromino.get_color()
         for x, y in blocks:
             if x < 0 or x >= self.width or y < 0 or y >= self.height:
-                return False
+                raise ValueError("Position out of bounds")
             self.grid[y][x] = (1, color)
-        return True
 
     def clear_rows(self):
         rows_to_clear = [i for i, row in enumerate(self.grid) if all(cell[0] == 1 for cell in row)]

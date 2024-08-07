@@ -5,7 +5,7 @@ import sys
 import os
 
 # Ensure the base directory is in the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from ui.main_game_screen import MainGameScreen
 from game_engine.grid_manager import Grid
