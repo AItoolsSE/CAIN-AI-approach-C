@@ -14,6 +14,7 @@ import pygame
 
 class TestMainGameScreen(unittest.TestCase):
     def setUp(self):
+        pygame.init()
         self.grid_width = 10
         self.grid_height = 20
         self.cell_size = 30
@@ -24,7 +25,8 @@ class TestMainGameScreen(unittest.TestCase):
     def test_draw_grid(self):
         self.screen.draw_grid(self.grid)
         # Check if the screen was updated by verifying the color of a cell
-        self.assertEqual(self.screen.screen.get_at((0, 0)), (0, 0, 0, 255))
+        self.assertEqual(self.screen.screen.get_at((1, 1)), (0, 0, 0, 255))  # Inside a cell
+        self.assertEqual(self.screen.screen.get_at((0, 0)), (50, 50, 50, 255))  # Grid line
 
     def test_draw_tetromino(self):
         self.tetromino.position = (0, 0)
@@ -32,12 +34,13 @@ class TestMainGameScreen(unittest.TestCase):
         # Check if the tetromino was drawn by verifying the color of a cell
         block = self.tetromino.get_blocks()[0]
         x, y = block[0] * self.cell_size, block[1] * self.cell_size
-        self.assertEqual(self.screen.screen.get_at((x, y)), (255, 255, 255, 255))
+        self.assertEqual(self.screen.screen.get_at((x + 1, y + 1)), self.tetromino.color + (255,))  # Inside a tetromino block
 
     def test_update(self):
         self.screen.update(self.grid, self.tetromino)
         # Check if the screen was updated by verifying the color of a cell
-        self.assertEqual(self.screen.screen.get_at((0, 0)), (0, 0, 0, 255))
+        self.assertEqual(self.screen.screen.get_at((1, 1)), (0, 0, 0, 255))  # Inside a cell
+        self.assertEqual(self.screen.screen.get_at((0, 0)), (50, 50, 50, 255))  # Grid line
 
     def tearDown(self):
         self.screen.quit()
