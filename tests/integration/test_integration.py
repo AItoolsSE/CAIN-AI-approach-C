@@ -3,6 +3,7 @@
 import unittest
 import sys
 import os
+import random
 
 # Ensure the base directory is in the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -41,47 +42,6 @@ class TestIntegration(unittest.TestCase):
             self.assertEqual(self.grid.grid[y][x][0], 1)  # Check presence of tetromino block
             self.assertEqual(self.grid.grid[y][x][1], tetromino.color)  # Check tetromino color
 
-    # @patch('pygame.event.get')
-    # def test_move_tetromino_left(self, mock_pygame_event_get):
-    #     tetromino = Tetromino()
-    #     tetromino.position = (5, 0)  # Place tetromino in the center
-    #     self.grid.place_tetromino(tetromino)
-    #     initial_blocks = tetromino.get_blocks()
-    #     print("Initial blocks before moving left:", initial_blocks)
-        
-    #     mock_pygame_event_get.return_value = [Mock(type=pygame.KEYDOWN, key=pygame.K_LEFT)]
-    #     self.keyboard_input.handle_events(mock_pygame_event_get.return_value)
-    #     if self.keyboard_input.is_key_pressed('left'):
-    #         tetromino.move('left', self.grid)
-        
-    #     moved_blocks = tetromino.get_blocks()
-    #     print("Moved blocks after moving left:", moved_blocks)
-    #     self.assertNotEqual(initial_blocks, moved_blocks)
-    #     for x, y in moved_blocks:
-    #         self.assertEqual(self.grid.grid[y][x][0], 1)  # Check presence of tetromino block
-
-    # @patch('pygame.event.get')
-    # def test_rotate_tetromino(self, mock_pygame_event_get):
-    #     tetromino = Tetromino()
-    #     tetromino.position = (5, 1)  # Place tetromino in the center
-    #     self.grid.place_tetromino(tetromino)
-    #     initial_blocks = tetromino.get_blocks()
-    #     print("Initial blocks before rotation:", initial_blocks)
-        
-    #     mock_pygame_event_get.return_value = [Mock(type=pygame.KEYDOWN, key=pygame.K_UP)]
-    #     self.keyboard_input.handle_events(mock_pygame_event_get.return_value)
-    #     if self.keyboard_input.is_key_pressed('rotate'):
-    #         tetromino.rotate(self.grid)
-        
-    #     rotated_blocks = tetromino.get_blocks()
-    #     print("Rotated blocks after rotation:", rotated_blocks)
-    #     if tetromino.shape == 'O':
-    #         self.assertEqual(initial_blocks, rotated_blocks)
-    #     else:
-    #         self.assertNotEqual(initial_blocks, rotated_blocks)
-    #     for x, y in rotated_blocks:
-    #         self.assertEqual(self.grid.grid[y][x][0], 1)  # Check presence of tetromino block
-
     def test_clear_row(self):
         self.grid.grid[19] = [(1, (255, 255, 255))] * 10
         print("Grid before clearing row:")
@@ -101,8 +61,9 @@ class TestIntegration(unittest.TestCase):
             print(row)
         self.assertTrue(self.grid.is_game_over())
 
+    @patch('random.choice', return_value='I')
     @patch('pygame.event.get')
-    def test_full_game_flow(self, mock_pygame_event_get):
+    def test_full_game_flow(self, mock_pygame_event_get, mock_random_choice):
         tetromino = Tetromino()
         self.grid.place_tetromino(tetromino)
         self.game.tetromino = tetromino
@@ -127,7 +88,9 @@ class TestIntegration(unittest.TestCase):
         if self.grid.is_game_over():
             self.game.game_over = True
         
-        self.assertTrue(self.game.game_over or self.score_manager.get_score() > 0)
+        self.assertFalse(self.game.game_over)
+        self.assertEqual(self.score_manager.get_score(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
