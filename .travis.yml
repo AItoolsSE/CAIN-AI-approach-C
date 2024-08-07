@@ -1,25 +1,17 @@
-dist: bionic  # Use a more recent Ubuntu distribution for better stability
+dist: bionic  # Use a more recent Ubuntu distribution
 language: python
 python:
-  - "3.10"
+  - "3.10"  # Use a supported and stable Python version
 
-# Caching to speed up build times
+# Enable caching to speed up build times and reduce network dependency
 cache:
   pip: true
 
-# Command to install dependencies with retry logic
+# Command to install dependencies
 install:
-  - pip install --retry 5 -r requirements.txt
+  - pip install -r requirements.txt
 
 # Command to run tests and linting
 script:
   - pytest
   - flake8 .
-
-# Notifications (optional)
-notifications:
-  email:
-    recipients:
-      - ga475@cam.ac.uk
-    on_success: never
-    on_failure: always
