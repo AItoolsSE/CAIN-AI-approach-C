@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.12"  # Specify the Python version you want to use
+  - "3.8"  # Specify the Python version you want to use
 
 # Command to install dependencies
 install:
