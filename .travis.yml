@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.12"  # Specify the Python version you want to use
+
+# Command to install dependencies
+install:
+  - pip install -r requirements.txt
+
+# Command to run tests
+script:
+  - pytest  # Run your test suite
+  - flake8 .  # Lint your code (optional)
