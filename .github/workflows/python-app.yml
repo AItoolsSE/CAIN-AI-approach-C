@@ -37,3 +37,26 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+  execute:
+    steps:
+    - name: Build python script into a stand-alone binary (ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: Nuitka/Nuitka-Action@main
+      with:
+        working-directory: src
+        nuitka-version: main
+        script-name: directory/main.py
+        onefile: true
+        output-file: main.bin
+    - name: Make binary executable
+      run: chmod +x ./src/build/main.bin
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.os }} build
+        path: src/build/main.bin
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: src/build/main.bin
