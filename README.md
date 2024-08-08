@@ -31,4 +31,4 @@ Subcomponents: (Details about specific sound management can be added here)
 Persistence Manager
 
 Description: Saves and loads player progress and high scores.
-Subcomponents: (Details about specific persistence management can be added here)
+Subcomponents: (Details about specific persistence management can be added here) 
