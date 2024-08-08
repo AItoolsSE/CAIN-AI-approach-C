@@ -62,7 +62,7 @@ jobs:
         run: |
           pyinstaller --onefile main.py
         env:
-          VERSION: ${{ github.sha }}
+          VERSION: ${{ github.ref }}
         
       - name: Create Release
         id: create_release
@@ -70,8 +70,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: Release ${{ github.sha }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
 
