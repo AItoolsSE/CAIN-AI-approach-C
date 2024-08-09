@@ -1,7 +1,7 @@
 # ui/control_panel.py
 
 import pygame
-from pygame.locals import *
+from pygame.locals import MOUSEBUTTONDOWN
 
 class ControlPanel(pygame.sprite.Sprite):
     def __init__(self, game, cell_size, grid_width):
@@ -41,6 +41,7 @@ class ControlPanel(pygame.sprite.Sprite):
 
     def create_labels(self):
         self.score_label = self.create_label('Score: 0', (self.grid_width * self.cell_size + 10, 250), self.font)
+        self.level_label = self.create_label('Level: 1', (self.grid_width * self.cell_size + 10, 300), self.font)  # New level label
 
     def create_label(self, text, position, font):
         label = pygame.sprite.Sprite()
@@ -60,8 +61,12 @@ class ControlPanel(pygame.sprite.Sprite):
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
                 self.game.view_high_scores()
 
-    def update(self):
+    def update(self, level=None):
+        
+        level = self.game.level_manager.get_level()
+        #print(f"Updating control panel: Level {level}, Score {self.game.get_score()}")  # Debugging print statement
         self.score_label.image = self.font.render(f'Score: {self.game.get_score()}', True, (255, 255, 255))
+        self.level_label.image = self.font.render(f'Level: {level}', True, (255, 255, 255))
 
     def draw(self, surface):
         mouse_pos = pygame.mouse.get_pos()
@@ -73,3 +78,4 @@ class ControlPanel(pygame.sprite.Sprite):
             surface.blit(button.image, button.rect)
             surface.blit(button.text_surf, button.text_rect)
         surface.blit(self.score_label.image, self.score_label.rect)
+        surface.blit(self.level_label.image, self.level_label.rect)  # Draw level label
