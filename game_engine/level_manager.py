@@ -1,7 +1,7 @@
 # game_engine/level_manager.py
 
 class LevelManager:
-    def __init__(self, points_per_level=40, speed_increment=250, base_speed=750):
+    def __init__(self, points_per_level=200, speed_increment=100, base_speed=750):
         self.level = 1
         self.points_per_level = points_per_level
         self.speed_increment = speed_increment
