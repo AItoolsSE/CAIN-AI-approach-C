@@ -46,6 +46,9 @@ def main():
                         game.toggle_pause()
 
                     if game.game_over:
+                        if not game.score_added:
+                            game.high_scores_manager.add_score(game.get_score())
+                            game.score_added = True
                         action = game_over_screen.handle_events(event)
                         if action == 'restart':
                             game.start_new_game()

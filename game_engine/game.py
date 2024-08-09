@@ -1,9 +1,8 @@
-# game_engine/game.py
-
 from game_engine.grid_manager import Grid
 from game_engine.tetromino_manager import Tetromino
 from game_engine.score_manager import ScoreManager
 from game_engine.level_manager import LevelManager  # Import LevelManager
+from game_engine.high_scores_manager import HighScoresManager  # Import HighScoresManager
 
 class Game:
     def __init__(self, grid_width, grid_height, control_panel):
@@ -11,9 +10,11 @@ class Game:
         self.tetromino = Tetromino()
         self.score_manager = ScoreManager()
         self.level_manager = LevelManager()  # Initialize LevelManager
+        self.high_scores_manager = HighScoresManager()  # Initialize HighScoresManager
         self.is_paused = False
         self.game_over = False
         self.control_panel = control_panel
+        self.score_added = False  # To track if the score has been added to high scores
 
     def start_new_game(self):
         self.grid = Grid(self.grid.width, self.grid.height)
@@ -23,6 +24,7 @@ class Game:
         self.is_paused = False
         self.game_over = False
         self.control_panel.update()  # Update control panel
+        self.score_added = False  # Reset score added flag for the new game
 
     def toggle_pause(self):
         self.is_paused = not self.is_paused
@@ -58,9 +60,13 @@ class Game:
             rows_cleared = self.grid.clear_rows()
             self.score_manager.add_points(rows_cleared)
             self.level_manager.update(self.score_manager.get_score())  # Update level based on score
+            print(f"Level: {self.level_manager.get_level()}")
             self.control_panel.update()  # Update control panel
             self.tetromino = Tetromino()
 
         # Check for game over
         if self.grid.is_game_over():
             self.game_over = True
+            if not self.score_added:
+                self.high_scores_manager.add_score(self.get_score())
+                self.score_added = True  # Ensure score is only added once
