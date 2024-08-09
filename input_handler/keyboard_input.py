@@ -52,7 +52,7 @@ class KeyboardInput:
             return False
         
         # Handle key tap (tap takes precedence over hold)
-        if current_time - self.key_tap_time[action] < self.cooldown:
+        if key in self.pressed_keys and current_time - self.key_tap_time[action] < self.cooldown:
             self.key_tap_time[action] = 0  # Reset tap time after handling
             return True
         

@@ -1,5 +1,3 @@
-# test_keyboard_input.py
-
 import unittest
 import pygame
 import sys
@@ -39,7 +37,10 @@ class TestKeyboardInput(unittest.TestCase):
         key_event = self.create_key_event(pygame.KEYDOWN, pygame.K_LEFT)
         self.keyboard_input.handle_events([key_event])
         self.assertIn(pygame.K_LEFT, self.keyboard_input.pressed_keys)
-        self.assertEqual(self.keyboard_input.last_press_time['left'], self.start_time)
+        
+        # Allowing a small range for time discrepancy
+        self.assertTrue(abs(self.keyboard_input.last_press_time['left'] - self.start_time) < 5)
+
     
     def test_handle_keyup_event(self):
         """
@@ -52,7 +53,7 @@ class TestKeyboardInput(unittest.TestCase):
     
     def test_is_key_pressed_with_cooldown(self):
         """
-        Test if a key press is recognized considering the cooldown.
+        Test if a key press is recognized considering the cooldown for holding the key down.
         """
         key_event = self.create_key_event(pygame.KEYDOWN, pygame.K_LEFT)
         self.keyboard_input.handle_events([key_event])
@@ -60,17 +61,7 @@ class TestKeyboardInput(unittest.TestCase):
         # Simulate waiting for cooldown
         pygame.time.wait(150)
         self.assertTrue(self.keyboard_input.is_key_pressed('left'))
-    
-    def test_is_key_pressed_without_cooldown(self):
-        """
-        Test if a key press is not recognized due to cooldown not being over.
-        """
-        key_event = self.create_key_event(pygame.KEYDOWN, pygame.K_LEFT)
-        self.keyboard_input.handle_events([key_event])
-        
-        # Check immediately without waiting for cooldown
-        self.assertFalse(self.keyboard_input.is_key_pressed('left'))
-    
+
     def test_non_existent_action(self):
         """
         Test the response to a non-existent action.
@@ -88,21 +79,6 @@ class TestKeyboardInput(unittest.TestCase):
         self.keyboard_input.handle_events(key_events)
         self.assertIn(pygame.K_LEFT, self.keyboard_input.pressed_keys)
         self.assertIn(pygame.K_RIGHT, self.keyboard_input.pressed_keys)
-    
-    def test_cooldown_accuracy(self):
-        """
-        Test that a key cannot be pressed again until the cooldown period has passed.
-        """
-        key_event = self.create_key_event(pygame.KEYDOWN, pygame.K_LEFT)
-        self.keyboard_input.handle_events([key_event])
-        
-        # Simulate waiting for a time shorter than cooldown
-        pygame.time.wait(50)
-        self.assertFalse(self.keyboard_input.is_key_pressed('left'))
-
-        # Simulate waiting for enough time to pass
-        pygame.time.wait(100)
-        self.assertTrue(self.keyboard_input.is_key_pressed('left'))
     
     def test_continuous_key_presses(self):
         """
@@ -132,6 +108,25 @@ class TestKeyboardInput(unittest.TestCase):
         key_events = [self.create_key_event(pygame.KEYDOWN, pygame.K_SPACE)] * 10
         self.keyboard_input.handle_events(key_events)
         self.assertIn(pygame.K_SPACE, self.keyboard_input.pressed_keys)
+
+    def test_key_hold_with_cooldown(self):
+        """
+        Test that holding down a key does not trigger the action within the cooldown period,
+        but does trigger after the cooldown period has passed.
+        """
+        key_event = self.create_key_event(pygame.KEYDOWN, pygame.K_LEFT)
+        self.keyboard_input.handle_events([key_event])
+
+        # Check that the key press is registered initially
+        self.assertTrue(self.keyboard_input.is_key_pressed('left'))
+
+        # Simulate holding the key by not releasing it and check immediately (should not trigger again)
+        pygame.time.wait(50)  # Wait less than the cooldown period
+        self.assertFalse(self.keyboard_input.is_key_pressed('left'))
+
+        # Simulate waiting for the cooldown period to pass
+        pygame.time.wait(self.keyboard_input.cooldown)
+        self.assertTrue(self.keyboard_input.is_key_pressed('left'))  # Now it should trigger again    
 
     def tearDown(self):
         """
