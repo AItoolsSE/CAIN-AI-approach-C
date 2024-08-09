@@ -59,3 +59,7 @@ class Game:
         # Check for game over
         if self.grid.is_game_over():
             self.game_over = True
+        
+    def view_high_scores(self):
+        # Logic to view high scores
+        pass
