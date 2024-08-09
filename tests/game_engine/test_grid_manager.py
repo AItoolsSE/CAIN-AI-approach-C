@@ -1,5 +1,3 @@
-# tests/game_engine/test_grid_manager.py
-
 import sys
 import os
 
@@ -51,12 +49,18 @@ class TestGridManager(unittest.TestCase):
 
         for shape_name, tetromino in tetromino_shapes.items():
             with self.subTest(tetromino=shape_name):
-                try:
+                with self.assertRaises(ValueError):
                     self.grid.place_tetromino(tetromino)
-                except ValueError:
-                    pass  # Expected outcome
-                else:
-                    self.fail(f"{shape_name} should raise ValueError")
+
+    def test_place_tetromino_with_overlap(self):
+        """
+        Test placing a new tetromino on top of an existing one.
+        """
+        self.grid.grid[19] = [(1, (255, 255, 255))] * 10
+        tetromino = Tetromino([(0, 18), (1, 18), (2, 18), (3, 18)])  # I-shape
+        self.grid.place_tetromino(tetromino)
+        self.assertTrue(all(self.grid.grid[18][x] == (1, tetromino.get_color()) for x in range(4)))
+        self.assertEqual(self.grid.grid[19][0], (1, (255, 255, 255)))
 
     def test_clear_rows(self):
         self.grid.grid[19] = [(1, (255, 255, 255))] * 10
@@ -76,6 +80,20 @@ class TestGridManager(unittest.TestCase):
         self.assertEqual(len(self.grid.grid), 20)
         self.assertTrue(all(len(row) == 10 for row in self.grid.grid))
 
+    def test_clear_rows_with_boundaries(self):
+        """
+        Test clearing rows with boundary conditions to ensure correct row clearing.
+        """
+        self.grid.grid[19] = [(1, (255, 255, 255))] * 10
+        self.grid.grid[18] = [(1, (255, 255, 255))] * 10
+        self.grid.grid[17] = [(1, (255, 255, 255))] * 10
+        cleared_rows = self.grid.clear_rows()
+        self.assertEqual(cleared_rows, 3)
+        self.assertTrue(all(cell == (0, None) for cell in self.grid.grid[19]))
+        self.assertTrue(all(cell == (0, None) for cell in self.grid.grid[18]))
+        self.assertTrue(all(cell == (0, None) for cell in self.grid.grid[17]))
+        self.assertEqual(len(self.grid.grid), 20)
+
     def test_is_game_over(self):
         self.assertFalse(self.grid.is_game_over())
         self.grid.grid[0][0] = (1, (255, 255, 255))
@@ -84,6 +102,24 @@ class TestGridManager(unittest.TestCase):
     def test_game_over_condition(self):
         for y in range(20):
             self.grid.grid[y][0] = (1, (255, 255, 255))
+        self.assertTrue(self.grid.is_game_over())
+
+    def test_game_over_non_filled_row(self):
+        """
+        Test that the game-over condition is not triggered by a partially filled row below the top row.
+        """
+        # Partially fill a row that is not the top row
+        self.grid.grid[1] = [(1, (255, 255, 255))] * 9 + [(0, None)]
+        # Ensure the top row is not filled
+        self.grid.grid[0] = [(0, None)] * 10
+        self.assertFalse(self.grid.is_game_over())  # Game should not be over
+
+
+    def test_full_grid(self):
+        """
+        Test if the grid correctly handles being completely filled.
+        """
+        self.grid.grid = [[(1, (255, 255, 255))] * 10 for _ in range(20)]
         self.assertTrue(self.grid.is_game_over())
 
 if __name__ == '__main__':
