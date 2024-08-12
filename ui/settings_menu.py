@@ -1,5 +1,3 @@
-# ui/settings_menu.py
-
 import pygame
 
 class SettingsMenu:
@@ -37,6 +35,12 @@ class SettingsMenu:
                 self.background_music_manager.set_volume(self.volume_slider.value)
 
     def draw(self, surface):
+        # Create a semi-transparent overlay
+        overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))  # Black with 180/255 transparency
+        surface.blit(overlay, (0, 0))  # Blit the overlay onto the screen
+
+        # Draw the buttons and slider on top of the semi-transparent background
         surface.blit(self.music_toggle_button.image, self.music_toggle_button.rect)
         surface.blit(self.music_toggle_button.text_surf, self.music_toggle_button.text_rect)
 
@@ -44,3 +48,4 @@ class SettingsMenu:
         pygame.draw.rect(surface, (0, 255, 0), (self.volume_slider.rect.x, self.volume_slider.rect.y, self.volume_slider.value * 150, self.volume_slider.rect.height))
         volume_text = self.font.render(f"Volume: {int(self.volume_slider.value * 100)}%", True, (255, 255, 255))
         surface.blit(volume_text, (self.volume_slider.rect.x, self.volume_slider.rect.y - 30))
+

@@ -56,7 +56,8 @@ class ControlPanel(pygame.sprite.Sprite):
             elif self.pause_button.rect.collidepoint(mouse_pos):
                 self.game.toggle_pause()
             elif self.settings_button.rect.collidepoint(mouse_pos):
-                self.game.toggle_settings()
+                # Directly handle the settings menu here
+                self.game.is_settings_open = not self.game.is_settings_open
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
                 self.game.view_high_scores()
 

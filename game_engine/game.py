@@ -15,6 +15,7 @@ class Game:
         self.high_scores_manager = HighScoresManager()  # Initialize HighScoresManager
         self.is_paused = False
         self.game_over = False
+        self.is_settings_open = False  # Initialize the settings menu state
         self.control_panel = control_panel
         self.score_added = False  # To track if the score has been added to high scores
 
@@ -31,6 +32,11 @@ class Game:
     def toggle_pause(self):
         self.is_paused = not self.is_paused
         self.control_panel.update()  # Update control panel
+    
+    def toggle_settings(self):
+        # This method could be used to open or close the settings menu
+        # For example, toggling a flag that shows or hides the settings menu
+        self.is_settings_open = not self.is_settings_open
 
     def get_score(self):
         return self.score_manager.get_score()
