@@ -17,6 +17,8 @@ class LevelManager:
             print(f"self.level {self.level}")  # Debugging print statement
             print(f"new_level {new_level}")  # Debugging print statement
             return True
+        #else:
+            #print(f"No level change: current level is {self.level}")  # Added debug print
         return False
 
     def get_current_speed(self):
@@ -27,5 +29,4 @@ class LevelManager:
 
     def get_level(self):
         """Return the current level."""
-        #print(f"self.level (as called by get_level): {self.level}")  # Debugging print statement
         return self.level

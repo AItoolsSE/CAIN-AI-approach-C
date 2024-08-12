@@ -1,3 +1,5 @@
+# sound_manager/background_music.py
+
 import pygame
 
 class BackgroundMusicManager:

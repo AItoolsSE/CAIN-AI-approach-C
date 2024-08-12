@@ -1,3 +1,5 @@
+# ui/settings_menu.py
+
 import pygame
 
 class SettingsMenu:

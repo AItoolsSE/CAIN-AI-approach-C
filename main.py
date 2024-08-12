@@ -8,8 +8,8 @@ from input_handler.keyboard_input import KeyboardInput
 from ui.main_game_screen import MainGameScreen
 from ui.control_panel import ControlPanel
 from ui.game_over_screen import GameOverScreen
-from ui.settings_menu import SettingsMenu  # Import SettingsMenu
-from sound_manager.background_music import BackgroundMusicManager  # Import BackgroundMusicManager
+from ui.settings_menu import SettingsMenu
+from sound_manager.background_music import BackgroundMusicManager
 from game_engine.score_manager import ScoreManager
 from game_engine.game import Game
 
@@ -42,7 +42,8 @@ def main():
         clock = pygame.time.Clock()
         last_drop_time = pygame.time.get_ticks()
 
-        DROP_INTERVAL = game.level_manager.get_current_speed()  # Use the level manager from the Game instance
+        DROP_INTERVAL = game.level_manager.get_current_speed()
+        settings_open = False  # Add a flag for settings menu state
 
         while True:
             try:
@@ -53,10 +54,18 @@ def main():
                         sys.exit()
 
                     control_panel.handle_events(event)
-                    settings_menu.handle_events(event)  # Handle settings menu events
+                    
+                    if settings_open:
+                        settings_menu.handle_events(event)
+                        settings_menu.draw(game_screen.screen)
+                        pygame.display.flip()
+                        continue
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                         game.toggle_pause()
+
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                        settings_open = not settings_open  # Toggle settings menu
 
                     if game.game_over:
                         if not game.score_added:
@@ -66,7 +75,7 @@ def main():
                         if action == 'restart':
                             game.start_new_game()
                             game.game_over = False
-                            DROP_INTERVAL = game.level_manager.get_current_speed()  # Reset drop interval
+                            DROP_INTERVAL = game.level_manager.get_current_speed()
                         elif action == 'exit':
                             pygame.quit()
                             sys.exit()
@@ -81,17 +90,18 @@ def main():
                 if game.is_paused:
                     control_panel.update()
                     control_panel.draw(game_screen.screen)
-                    settings_menu.draw(game_screen.screen)  # Draw settings menu
                     pygame.display.flip()
                     continue
 
                 current_time = pygame.time.get_ticks()
 
                 if game.level_manager.update(game.score_manager.get_score()):
-                    DROP_INTERVAL = game.level_manager.get_current_speed()
+                    DROP_INTERVAL = game.level_manager.get_current_speed()  # Update drop interval based on the new level
+                    print(f"Level increased to {game.level_manager.get_level()}, new speed: {DROP_INTERVAL}")  # Debug print
                     control_panel.update()
                     control_panel.draw(game_screen.screen)
 
+                # Move the Tetromino down at regular intervals
                 if current_time - last_drop_time > DROP_INTERVAL:
                     if not game.tetromino.move('down', game.grid):
                         game.grid.place_tetromino(game.tetromino)
@@ -115,7 +125,6 @@ def main():
                 game_screen.draw_grid(game.grid)
                 game_screen.draw_tetromino(game.tetromino)
                 control_panel.draw(game_screen.screen)
-                settings_menu.draw(game_screen.screen)  # Draw settings menu
 
                 if game.game_over:
                     game_over_screen.display(game_screen.screen, game.score_manager.get_score())
