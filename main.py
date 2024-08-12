@@ -1,5 +1,3 @@
-#main.py
-
 import pygame
 import sys
 from game_engine.grid_manager import Grid
@@ -12,28 +10,40 @@ from ui.settings_menu import SettingsMenu
 from sound_manager.background_music import BackgroundMusicManager
 from game_engine.score_manager import ScoreManager
 from game_engine.game import Game
+from game_engine.high_scores_manager import HighScoresManager  # Import HighScoresManager
 
 # Game settings
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
 CELL_SIZE = 30
 FPS = 60
-CONTROL_PANEL_WIDTH = 400
+CONTROL_PANEL_WIDTH = 250
 
 def main():
     try:
         pygame.init()
+
+        # Calculate the total width of the game window
+        total_window_width = (GRID_WIDTH * CELL_SIZE) + CONTROL_PANEL_WIDTH
+        total_window_height = GRID_HEIGHT * CELL_SIZE
+
+        # Set the game window size
+        screen = pygame.display.set_mode((total_window_width, total_window_height))
+
+        pygame.display.set_caption('Tetris')
 
         # Initialize background music
         background_music_manager = BackgroundMusicManager("sound_manager/assets/background_music.mp3")
         background_music_manager.play_music()
 
         # Create game objects
-        game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE)
+        game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, screen)  # Pass screen to MainGameScreen
         control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH)
         game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel)
+        high_scores_manager = HighScoresManager()  # Initialize HighScoresManager
+        game.high_scores_manager = high_scores_manager  # Attach it to the game object
         control_panel.game = game  # Set the game instance in the control panel
-        game_over_screen = GameOverScreen(game_screen.screen.get_width(), game_screen.screen.get_height())
+        game_over_screen = GameOverScreen(total_window_width, total_window_height)
         keyboard_input = KeyboardInput()
 
         # Create settings menu
@@ -57,7 +67,7 @@ def main():
                     
                     if settings_open:
                         settings_menu.handle_events(event)
-                        settings_menu.draw(game_screen.screen)
+                        settings_menu.draw(screen)  # Use the screen to draw the settings menu
                         pygame.display.flip()
                         continue
 
@@ -81,7 +91,7 @@ def main():
                             sys.exit()
 
                 if game.game_over:
-                    game_over_screen.display(game_screen.screen, game.score_manager.get_score())
+                    game_over_screen.display(screen, game.score_manager.get_score())  # Pass screen to game over display
                     pygame.display.flip()
                     continue
 
@@ -89,7 +99,7 @@ def main():
 
                 if game.is_paused:
                     control_panel.update()
-                    control_panel.draw(game_screen.screen)
+                    control_panel.draw(screen)  # Draw on the screen
                     pygame.display.flip()
                     continue
 
@@ -99,7 +109,7 @@ def main():
                     DROP_INTERVAL = game.level_manager.get_current_speed()  # Update drop interval based on the new level
                     print(f"Level increased to {game.level_manager.get_level()}, new speed: {DROP_INTERVAL}")  # Debug print
                     control_panel.update()
-                    control_panel.draw(game_screen.screen)
+                    control_panel.draw(screen)  # Draw on the screen
 
                 # Move the Tetromino down at regular intervals
                 if current_time - last_drop_time > DROP_INTERVAL:
@@ -121,13 +131,13 @@ def main():
                 game_screen.update(game.grid, game.tetromino)
                 control_panel.update()
 
-                game_screen.screen.fill((0, 0, 0))
+                screen.fill((0, 0, 0))  # Clear the screen
                 game_screen.draw_grid(game.grid)
                 game_screen.draw_tetromino(game.tetromino)
-                control_panel.draw(game_screen.screen)
+                control_panel.draw(screen)  # Draw control panel on the screen
 
                 if game.game_over:
-                    game_over_screen.display(game_screen.screen, game.score_manager.get_score())
+                    game_over_screen.display(screen, game.score_manager.get_score())  # Display game over screen
 
                 pygame.display.flip()
                 clock.tick(FPS)

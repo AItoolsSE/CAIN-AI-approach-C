@@ -1,4 +1,4 @@
-#game_engine/high_scores_manager.py
+# game_engine/high_scores_manager.py
 
 import datetime
 

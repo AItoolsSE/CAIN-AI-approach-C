@@ -1,17 +1,13 @@
 # ui/main_game_screen.py
 
 import pygame
-from game_engine.grid_manager import Grid
-from game_engine.tetromino_manager import Tetromino
 
 class MainGameScreen:
-    def __init__(self, grid_width, grid_height, cell_size):
-        pygame.init()
+    def __init__(self, grid_width, grid_height, cell_size, screen):
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.cell_size = cell_size
-        self.screen = pygame.display.set_mode((grid_width * cell_size + 200, grid_height * cell_size))
-        pygame.display.set_caption("Tetris")
+        self.screen = screen  # Use the screen passed as an argument
 
     def draw_grid(self, grid):
         for y in range(grid.height):
@@ -33,7 +29,6 @@ class MainGameScreen:
         self.screen.fill((0, 0, 0))
         self.draw_grid(grid)
         self.draw_tetromino(tetromino)
-
 
     def quit(self):
         pygame.quit()
