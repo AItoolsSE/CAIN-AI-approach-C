@@ -10,15 +10,11 @@ class LevelManager:
 
     def update(self, current_points):
         """Update the level based on the player's current score."""
-        # Calculate the expected level based on the score
         new_level = (current_points // self.points_per_level) + 1
         if new_level > self.level:
             self.level = new_level
-            print(f"self.level {self.level}")  # Debugging print statement
-            print(f"new_level {new_level}")  # Debugging print statement
+            print(f"Level updated to {self.level}")
             return True
-        #else:
-            #print(f"No level change: current level is {self.level}")  # Added debug print
         return False
 
     def get_current_speed(self):

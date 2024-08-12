@@ -37,23 +37,24 @@ def main():
         background_music_manager.play_music()
 
         # Create game objects
-        game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, screen)  # Pass screen to MainGameScreen
+        game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, screen)
         control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH)
         game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel)
-        high_scores_manager = HighScoresManager()  # Initialize HighScoresManager
-        game.high_scores_manager = high_scores_manager  # Attach it to the game object
-        control_panel.game = game  # Set the game instance in the control panel
+        high_scores_manager = HighScoresManager()
+        game.high_scores_manager = high_scores_manager
+        control_panel.game = game
         game_over_screen = GameOverScreen(total_window_width, total_window_height)
         keyboard_input = KeyboardInput()
 
-        # Create settings menu
         settings_menu = SettingsMenu(game, background_music_manager)
 
         clock = pygame.time.Clock()
         last_drop_time = pygame.time.get_ticks()
 
+        # Initialize DROP_INTERVAL with the current level speed
         DROP_INTERVAL = game.level_manager.get_current_speed()
-        settings_open = False  # Add a flag for settings menu state
+
+        settings_open = False
 
         while True:
             try:
@@ -64,10 +65,10 @@ def main():
                         sys.exit()
 
                     control_panel.handle_events(event)
-                    
+
                     if settings_open:
                         settings_menu.handle_events(event)
-                        settings_menu.draw(screen)  # Use the screen to draw the settings menu
+                        settings_menu.draw(screen)
                         pygame.display.flip()
                         continue
 
@@ -75,7 +76,7 @@ def main():
                         game.toggle_pause()
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                        settings_open = not settings_open  # Toggle settings menu
+                        settings_open = not settings_open
 
                     if game.game_over:
                         if not game.score_added:
@@ -91,7 +92,7 @@ def main():
                             sys.exit()
 
                 if game.game_over:
-                    game_over_screen.display(screen, game.score_manager.get_score())  # Pass screen to game over display
+                    game_over_screen.display(screen, game.score_manager.get_score())
                     pygame.display.flip()
                     continue
 
@@ -99,18 +100,18 @@ def main():
 
                 if game.is_paused:
                     control_panel.update()
-                    control_panel.draw(screen)  # Draw on the screen
+                    control_panel.draw(screen)
                     pygame.display.flip()
                     continue
 
                 current_time = pygame.time.get_ticks()
 
+                # Check for level changes and update DROP_INTERVAL accordingly
                 if game.level_manager.update(game.score_manager.get_score()):
                     DROP_INTERVAL = game.level_manager.get_current_speed()  # Update drop interval based on the new level
                     print(f"Level increased to {game.level_manager.get_level()}, new speed: {DROP_INTERVAL}")  # Debug print
                     control_panel.update()
-                    control_panel.draw(screen)  # Draw on the screen
-
+                    
                 # Move the Tetromino down at regular intervals
                 if current_time - last_drop_time > DROP_INTERVAL:
                     if not game.tetromino.move('down', game.grid):
@@ -128,16 +129,13 @@ def main():
                 if game.grid.is_game_over():
                     game.game_over = True
 
+                screen.fill((0, 0, 0))
                 game_screen.update(game.grid, game.tetromino)
                 control_panel.update()
-
-                screen.fill((0, 0, 0))  # Clear the screen
-                game_screen.draw_grid(game.grid)
-                game_screen.draw_tetromino(game.tetromino)
-                control_panel.draw(screen)  # Draw control panel on the screen
+                control_panel.draw(screen)
 
                 if game.game_over:
-                    game_over_screen.display(screen, game.score_manager.get_score())  # Display game over screen
+                    game_over_screen.display(screen, game.score_manager.get_score())
 
                 pygame.display.flip()
                 clock.tick(FPS)
