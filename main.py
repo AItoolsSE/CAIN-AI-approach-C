@@ -1,3 +1,4 @@
+#main.py
 import pygame
 import sys
 from game_engine.grid_manager import Grid
@@ -8,9 +9,10 @@ from ui.control_panel import ControlPanel
 from ui.game_over_screen import GameOverScreen
 from ui.settings_menu import SettingsMenu
 from sound_manager.background_music import BackgroundMusicManager
+from sound_manager.sound_effects import SoundEffectsManager  # Import SoundEffectsManager
 from game_engine.score_manager import ScoreManager
 from game_engine.game import Game
-from game_engine.high_scores_manager import HighScoresManager  # Import HighScoresManager
+from game_engine.high_scores_manager import HighScoresManager
 
 # Game settings
 GRID_WIDTH = 10
@@ -35,17 +37,26 @@ def main():
         background_music_manager = BackgroundMusicManager("sound_manager/assets/background_music.mp3")
         background_music_manager.play_music()
 
+        # Initialize sound effects manager with the sound files
+        sound_files = {
+            "row_cleared": "sound_manager/assets/line_clear.mp3",
+            "block_placed": "sound_manager/assets/solidify.mp3",
+            "game_over": "sound_manager/assets/game_over.mp3",
+            "next_level": "sound_manager/assets/next_level.mp3"  # Add this file later if not available
+        }
+        sound_effects_manager = SoundEffectsManager(sound_files)
+
         # Create game objects
         game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, screen)
         control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH)
-        game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel)
+        game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel, sound_effects_manager)
         high_scores_manager = HighScoresManager()
         game.high_scores_manager = high_scores_manager
         control_panel.game = game
         game_over_screen = GameOverScreen(total_window_width, total_window_height)
         keyboard_input = KeyboardInput()
 
-        settings_menu = SettingsMenu(game, background_music_manager)
+        settings_menu = SettingsMenu(game, background_music_manager, CELL_SIZE, CONTROL_PANEL_WIDTH)
 
         clock = pygame.time.Clock()
         last_drop_time = pygame.time.get_ticks()
@@ -77,15 +88,15 @@ def main():
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                         game.toggle_settings()  # Toggle settings menu
 
+                # Always draw the game grid and tetromino, even if paused
+                game_screen.update(game.grid, game.tetromino)
+                control_panel.update()
+                game_screen.draw_grid(game.grid)
+                game_screen.draw_tetromino(game.tetromino)
+                control_panel.draw(screen)
+
                 # If settings menu is open, draw the semi-transparent overlay and the settings menu
                 if game.is_settings_open:
-                    # Draw the game behind the settings menu
-                    game_screen.update(game.grid, game.tetromino)
-                    control_panel.update()
-                    game_screen.draw_grid(game.grid)
-                    game_screen.draw_tetromino(game.tetromino)
-                    control_panel.draw(screen)
-
                     overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
                     overlay.fill((0, 0, 0, 180))  # Black with 180/255 transparency
                     screen.blit(overlay, (0, 0))  # Blit the overlay onto the screen
@@ -111,34 +122,19 @@ def main():
                     else:
                         keyboard_input.handle_events(events)
 
-                        if game.is_paused:
-                            control_panel.update()
-                            control_panel.draw(screen)
-                        else:
+                        if not game.is_paused:
                             current_time = pygame.time.get_ticks()
 
                             if game.level_manager.update(game.score_manager.get_score()):
                                 DROP_INTERVAL = game.level_manager.get_current_speed()
                                 control_panel.update()
 
+                            # Handle natural falling of Tetromino based on time
                             if current_time - last_drop_time > DROP_INTERVAL:
-                                if not game.tetromino.move('down', game.grid):
-                                    game.grid.place_tetromino(game.tetromino)
-                                    rows_cleared = game.grid.clear_rows()
-                                    game.score_manager.add_points(rows_cleared)
-                                    control_panel.update()
-                                    game.tetromino = Tetromino()
-                                    if game.grid.is_game_over():
-                                        game.game_over = True
+                                game.handle_natural_falling()
                                 last_drop_time = current_time
 
                             game.update(keyboard_input)
-
-                            game_screen.update(game.grid, game.tetromino)
-                            control_panel.update()
-                            game_screen.draw_grid(game.grid)
-                            game_screen.draw_tetromino(game.tetromino)
-                            control_panel.draw(screen)
 
                 pygame.display.flip()  # Only one call to flip at the end of the loop
                 clock.tick(FPS)
@@ -155,4 +151,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
