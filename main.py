@@ -1,6 +1,6 @@
-#main.py
 import pygame
 import sys
+from datetime import datetime
 from game_engine.grid_manager import Grid
 from game_engine.tetromino_manager import Tetromino
 from input_handler.keyboard_input import KeyboardInput
@@ -9,10 +9,11 @@ from ui.control_panel import ControlPanel
 from ui.game_over_screen import GameOverScreen
 from ui.settings_menu import SettingsMenu
 from sound_manager.background_music import BackgroundMusicManager
-from sound_manager.sound_effects import SoundEffectsManager  # Import SoundEffectsManager
+from sound_manager.sound_effects import SoundEffectsManager
 from game_engine.score_manager import ScoreManager
 from game_engine.game import Game
 from game_engine.high_scores_manager import HighScoresManager
+from persistence_manager.high_scores import HighScoresPersistenceManager
 
 # Game settings
 GRID_WIDTH = 10
@@ -42,17 +43,28 @@ def main():
             "row_cleared": "sound_manager/assets/line_clear.mp3",
             "block_placed": "sound_manager/assets/solidify.mp3",
             "game_over": "sound_manager/assets/game_over.mp3",
-            "next_level": "sound_manager/assets/next_level.mp3"  # Add this file later if not available
+            "next_level": "sound_manager/assets/next_level.mp3"
         }
         sound_effects_manager = SoundEffectsManager(sound_files)
 
+        # Initialize the control panel first
+        control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH, GRID_HEIGHT, CONTROL_PANEL_WIDTH)
+
+        # Define the path to the high_scores.json file
+        high_scores_file_path = "persistence_manager/data/high_scores.json"
+
+        # Initialize the HighScoresPersistenceManager with the file path
+        high_scores_persistence_manager = HighScoresPersistenceManager(high_scores_file_path)
+
         # Create game objects
         game_screen = MainGameScreen(GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, screen)
-        control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH)
-        game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel, sound_effects_manager)
+        game = Game(GRID_WIDTH, GRID_HEIGHT, control_panel, sound_effects_manager, high_scores_persistence_manager)
+        
+        # Set the high scores manager in the control panel
         high_scores_manager = HighScoresManager()
         game.high_scores_manager = high_scores_manager
         control_panel.game = game
+        
         game_over_screen = GameOverScreen(total_window_width, total_window_height)
         keyboard_input = KeyboardInput()
 
@@ -102,8 +114,15 @@ def main():
                     screen.blit(overlay, (0, 0))  # Blit the overlay onto the screen
                     settings_menu.draw(screen)  # Draw the settings menu on top
 
+                elif game.is_high_scores_open:
+                    # Draw the high scores screen if it is open
+                    high_scores_screen = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+                    high_scores_screen.fill((0, 0, 0, 180))  # Semi-transparent black background
+                    screen.blit(high_scores_screen, (0, 0))
+                    control_panel.draw_high_scores(screen)  # Render the high scores table on top
+
                 else:
-                    # Game logic when the settings menu is not open
+                    # Game logic when neither settings nor high scores are open
                     if game.game_over:
                         if not game.score_added:
                             game.high_scores_manager.add_score(game.get_score())
