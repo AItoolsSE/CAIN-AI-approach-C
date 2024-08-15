@@ -35,6 +35,7 @@ class ControlPanel(pygame.sprite.Sprite):
         button.text_surf = self.font.render(text, True, (255, 255, 255))
         button.text_rect = button.text_surf.get_rect(center=button.rect.center)
         button.color = color  # Store the color for restoring later
+        button.text = text  # Add this line to store the text
         return button
 
     def create_labels(self):
@@ -63,9 +64,9 @@ class ControlPanel(pygame.sprite.Sprite):
             elif self.pause_button.rect.collidepoint(mouse_pos):
                 self.game.toggle_pause()
             elif self.settings_button.rect.collidepoint(mouse_pos):
-                self.game.is_settings_open = not self.game.is_settings_open
+                self.game.toggle_settings()  # Update this line
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
-                self.game.toggle_high_scores()  # Toggle the high scores screen
+                self.game.toggle_high_scores()  # Update this line
             else:
                 # Check if the high scores menu is open and click is outside the menu
                 if self.game.is_high_scores_open:
@@ -81,6 +82,7 @@ class ControlPanel(pygame.sprite.Sprite):
                     if not (table_x <= mouse_pos[0] <= table_x + table_width and 
                             table_y <= mouse_pos[1] <= table_y + table_height):
                         self.game.toggle_high_scores()  # Close the high scores screen
+
 
     def update(self):
         level = self.game.level_manager.get_level()

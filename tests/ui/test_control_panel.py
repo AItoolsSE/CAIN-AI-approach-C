@@ -12,8 +12,11 @@ class TestControlPanel(unittest.TestCase):
     def setUp(self):
         pygame.init()
         self.mock_game = Mock()
+        self.mock_game.high_scores_persistence_manager.get_top_high_score.return_value = {"score": 100}
         self.screen = pygame.display.set_mode((800, 600))
-        self.control_panel = ControlPanel(self.mock_game, 30, 10)
+        self.grid_height = 20  # Add grid height
+        self.control_panel_width = 250  # Add control panel width
+        self.control_panel = ControlPanel(self.mock_game, 30, 10, self.grid_height, self.control_panel_width)
     
     def test_create_button(self):
         button = self.control_panel.create_button((150, 50), (255, 0, 0), (10, 10), "Test")
@@ -36,15 +39,16 @@ class TestControlPanel(unittest.TestCase):
         self.control_panel.handle_events(event)
         self.mock_game.toggle_pause.assert_called_once()
     
-    def test_handle_events_settings_button(self):
-        event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.settings_button.rect.topleft})
-        self.control_panel.handle_events(event)
-        self.mock_game.open_settings.assert_called_once()
-    
     def test_handle_events_high_scores_button(self):
         event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.high_scores_button.rect.topleft})
         self.control_panel.handle_events(event)
-        self.mock_game.view_high_scores.assert_called_once()
+        self.mock_game.toggle_high_scores.assert_called_once()
+
+    def test_handle_events_settings_button(self):
+        event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.settings_button.rect.topleft})
+        self.control_panel.handle_events(event)
+        self.mock_game.toggle_settings.assert_called_once()
+
 
     def test_handle_events_no_button_click(self):
         event = pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': (0, 0)})  # Position outside buttons

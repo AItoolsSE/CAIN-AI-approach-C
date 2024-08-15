@@ -25,10 +25,35 @@ class TestIntegration(unittest.TestCase):
         self.grid = Grid(self.grid_width, self.grid_height)
         self.keyboard_input = KeyboardInput()
         self.score_manager = ScoreManager()
-        self.screen = MainGameScreen(self.grid_width, self.grid_height, self.cell_size)
-        self.control_panel = ControlPanel(None, self.cell_size, self.grid_width)
-        self.game = Game(self.grid_width, self.grid_height, self.control_panel)
+        
+        # Create a screen surface for rendering
+        self.screen_surface = pygame.display.set_mode((self.grid_width * self.cell_size + 250, self.grid_height * self.cell_size))
+        self.screen = MainGameScreen(self.grid_width, self.grid_height, self.cell_size, self.screen_surface)
+        
+        # Mock the sound effects manager
+        self.sound_effects_manager = Mock()
+        
+        # Mock the high scores persistence manager
+        self.high_scores_persistence_manager = Mock()
+        
+        # Mock the top high score to return a dictionary
+        self.high_scores_persistence_manager.get_top_high_score.return_value = {"score": 100}
+        
+        # Initialize the control panel
+        self.control_panel = ControlPanel(None, self.cell_size, self.grid_width, self.grid_height, 250)
+        
+        # Initialize the game with the mocked objects
+        self.game = Game(
+            self.grid_width, 
+            self.grid_height, 
+            self.control_panel, 
+            self.sound_effects_manager, 
+            self.high_scores_persistence_manager
+        )
+        
+        # Set the game object in the control panel
         self.control_panel.game = self.game
+
 
     def test_place_tetromino_on_grid(self):
         tetromino = Tetromino()
@@ -213,16 +238,17 @@ class TestIntegration(unittest.TestCase):
         self.assertTrue(any(self.grid.grid[y][x][0] == 1 for x, y in tetromino.get_blocks()))
 
     def test_control_panel_interaction(self):
+        # Simulate clicking the "Pause" button to pause the game
         self.control_panel.handle_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.pause_button.rect.topleft}))
-        self.assertTrue(self.game.is_paused)  # Assuming `is_paused` flag is in Game class
+        self.assertTrue(self.game.is_paused)  # Check if the game is paused
         
-        # Simulate clicking "Start" to resume
+        # Simulate clicking "Start" to resume the game
         self.control_panel.handle_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.start_button.rect.topleft}))
-        self.assertFalse(self.game.is_paused)
+        self.assertFalse(self.game.is_paused)  # Check if the game is no longer paused
         
-        # Simulate opening high scores
+        # Simulate clicking the "High Scores" button to open the high scores screen
         self.control_panel.handle_events(pygame.event.Event(pygame.MOUSEBUTTONDOWN, {'pos': self.control_panel.high_scores_button.rect.topleft}))
-        self.assertTrue(self.game.view_high_scores)  # Assuming `viewing_high_scores` flag in Game class
+        self.assertTrue(self.game.is_high_scores_open)  # Check if the high scores screen is open
 
 if __name__ == '__main__':
     unittest.main()

@@ -18,9 +18,11 @@ class TestMainGameScreen(unittest.TestCase):
         self.grid_width = 10
         self.grid_height = 20
         self.cell_size = 30
-        self.screen = MainGameScreen(self.grid_width, self.grid_height, self.cell_size)
+        self.display_surface = pygame.display.set_mode((self.grid_width * self.cell_size, self.grid_height * self.cell_size))
+        self.screen = MainGameScreen(self.grid_width, self.grid_height, self.cell_size, self.display_surface)
         self.grid = Grid(self.grid_width, self.grid_height)
         self.tetromino = Tetromino()
+
 
     def test_draw_grid(self):
         self.screen.draw_grid(self.grid)
