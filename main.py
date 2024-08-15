@@ -119,7 +119,7 @@ def main():
                     high_scores_screen = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
                     high_scores_screen.fill((0, 0, 0, 180))  # Semi-transparent black background
                     screen.blit(high_scores_screen, (0, 0))
-                    control_panel.draw_high_scores(screen)  # Render the high scores table on top
+                    control_panel.draw_high_scores(screen)  # Render the all-time high scores table on top
 
                 else:
                     # Game logic when neither settings nor high scores are open

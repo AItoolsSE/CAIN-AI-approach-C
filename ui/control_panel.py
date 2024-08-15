@@ -45,7 +45,7 @@ class ControlPanel(pygame.sprite.Sprite):
         screen_height = self.cell_size * self.grid_height
         self.top_score_label = self.create_label(
             'All-Time Best: 0',
-            (screen_width - 200, screen_height - 50),
+            (screen_width - 240, screen_height - 50),
             self.font
         )
 
@@ -66,6 +66,21 @@ class ControlPanel(pygame.sprite.Sprite):
                 self.game.is_settings_open = not self.game.is_settings_open
             elif self.high_scores_button.rect.collidepoint(mouse_pos):
                 self.game.toggle_high_scores()  # Toggle the high scores screen
+            else:
+                # Check if the high scores menu is open and click is outside the menu
+                if self.game.is_high_scores_open:
+                    # Calculate the position of the high scores menu
+                    screen_width = self.grid_width * self.cell_size + self.control_panel_width
+                    screen_height = self.grid_height * self.cell_size
+                    table_width = 300  # Use the same width as defined in draw_high_scores
+                    table_height = 400  # Use the same height as defined in draw_high_scores
+                    table_x = (screen_width - table_width) // 2
+                    table_y = (screen_height - table_height) // 2
+
+                    # Check if the click is outside the high scores menu area
+                    if not (table_x <= mouse_pos[0] <= table_x + table_width and 
+                            table_y <= mouse_pos[1] <= table_y + table_height):
+                        self.game.toggle_high_scores()  # Close the high scores screen
 
     def update(self):
         level = self.game.level_manager.get_level()
@@ -77,6 +92,43 @@ class ControlPanel(pygame.sprite.Sprite):
         self.top_score_label.image = self.font.render(f'All-Time Best: {top_score_value}', True, (255, 255, 255))
 
     def draw_high_scores(self, surface):
+        # Get the screen dimensions
+        screen_width = self.grid_width * self.cell_size + self.control_panel_width
+        screen_height = self.grid_height * self.cell_size
+        
+        # Define the width and height of the high scores table
+        table_width = 300  # Adjust this width according to your needs
+        table_height = 400  # Adjust this height according to your needs
+        
+        # Calculate the position to center the table on the screen
+        table_x = (screen_width - table_width) // 2
+        table_y = (screen_height - table_height) // 2
+        
+        # Draw the semi-transparent background for the table
+        background_rect = pygame.Rect(table_x, table_y, table_width, table_height)
+        pygame.draw.rect(surface, (0, 0, 0, 180), background_rect)
+        
+        # Draw the title
+        title = self.font.render("All-Time High Scores", True, (255, 255, 255))
+        surface.blit(title, (table_x + (table_width - title.get_width()) // 2, table_y + 20))
+        
+        # Draw column headers
+        score_header = self.small_font.render("Score", True, (255, 255, 255))
+        date_header = self.small_font.render("Date", True, (255, 255, 255))
+        surface.blit(score_header, (table_x + 20, table_y + 60))
+        surface.blit(date_header, (table_x + 120, table_y + 60))
+        
+        # Draw the high scores
+        high_scores = self.game.high_scores_persistence_manager.get_top_ten_high_scores()
+        for i, entry in enumerate(high_scores):
+            y_pos = table_y + 90 + i * 30
+            score_text = self.small_font.render(str(entry['score']), True, (255, 255, 255))
+            date_text = self.small_font.render(entry['date'], True, (255, 255, 255))
+            surface.blit(score_text, (table_x + 20, y_pos))
+            surface.blit(date_text, (table_x + 120, y_pos))
+
+    def draw_current_session_scores(self, surface):
+        """Draw the current session high scores table."""
         title = self.font.render("Current Session", True, (255, 255, 255))
         surface.blit(title, (self.grid_width * self.cell_size + 10, 340))
 
@@ -105,4 +157,7 @@ class ControlPanel(pygame.sprite.Sprite):
         surface.blit(self.score_label.image, self.score_label.rect)
         surface.blit(self.level_label.image, self.level_label.rect)
         surface.blit(self.top_score_label.image, self.top_score_label.rect)
-        self.draw_high_scores(surface)
+        
+        # Draw the current session scores by default
+        if not self.game.is_high_scores_open:
+            self.draw_current_session_scores(surface)
