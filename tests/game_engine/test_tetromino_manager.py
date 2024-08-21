@@ -121,6 +121,21 @@ class TestTetrominoManager(unittest.TestCase):
                 if shape != 'O':
                     self.assertNotEqual(tetromino.blocks, initial_blocks)
 
+    def test_no_three_consecutive_pieces(self):
+        tetromino = Tetromino()
+        consecutive_count = 1
+        last_piece = tetromino.shape
+
+        for _ in range(100000):
+            new_piece = tetromino.generate_new_piece()
+            if new_piece == last_piece:
+                consecutive_count += 1
+            else:
+                consecutive_count = 1
+
+            last_piece = new_piece
+            self.assertLessEqual(consecutive_count, 2, "Same piece appeared more than twice in a row")
+
 if __name__ == '__main__':
     unittest.main()
 

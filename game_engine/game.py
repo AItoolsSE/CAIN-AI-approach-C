@@ -65,7 +65,7 @@ class Game:
                 self.score_manager.add_points(rows_cleared)
                 self.level_manager.update(self.score_manager.get_score())  # Update level based on score
                 self.control_panel.update()  # Update control panel
-                self.tetromino = Tetromino()
+                self.tetromino.generate_new_piece()  # Generate a new Tetromino
 
         # Handle rotation
         if keyboard_input.is_key_pressed('rotate'):
@@ -104,7 +104,7 @@ class Game:
             self.score_manager.add_points(rows_cleared)
             self.level_manager.update(self.score_manager.get_score())  # Update level based on score
             self.control_panel.update()  # Update control panel
-            self.tetromino = Tetromino()
+            self.tetromino.generate_new_piece()  # Generate a new Tetromino
 
         # Check for game over
         if self.grid.is_game_over():

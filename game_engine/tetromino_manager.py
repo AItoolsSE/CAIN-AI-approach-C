@@ -28,6 +28,7 @@ class Tetromino:
         self.blocks = self.SHAPES[self.shape]
         self.color = self.COLORS[self.shape]
         self.position = (3, 0)
+        self.last_two_pieces = []
 
     def move(self, direction, grid):
         x, y = self.position
@@ -52,3 +53,20 @@ class Tetromino:
 
     def get_color(self):
         return self.color
+    
+    def generate_new_piece(self):
+        pieces = list(self.SHAPES.keys())
+        new_piece = random.choice(pieces)
+
+        while len(self.last_two_pieces) == 2 and new_piece == self.last_two_pieces[-1] == self.last_two_pieces[-2]:
+            new_piece = random.choice(pieces)
+
+        self.last_two_pieces.append(new_piece)
+        if len(self.last_two_pieces) > 2:
+            self.last_two_pieces.pop(0)
+
+        self.shape = new_piece
+        self.blocks = self.SHAPES[self.shape]
+        self.color = self.COLORS[self.shape]
+        self.position = (3, 0)
+        return new_piece
