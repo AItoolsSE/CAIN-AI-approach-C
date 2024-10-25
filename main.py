@@ -15,6 +15,18 @@ from game_engine.game import Game
 from game_engine.high_scores_manager import HighScoresManager
 from persistence_manager.high_scores import HighScoresPersistenceManager
 
+import os
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temporary folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 # Game settings
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
@@ -35,15 +47,15 @@ def main():
         pygame.display.set_caption('Tetris')
 
         # Initialize background music
-        background_music_manager = BackgroundMusicManager("sound_manager/assets/background_music.mp3")
+        background_music_manager = BackgroundMusicManager(resource_path("sound_manager/assets/background_music.mp3"))
         background_music_manager.play_music()
 
         # Initialize sound effects manager with the sound files
         sound_files = {
-            "row_cleared": "sound_manager/assets/line_clear.mp3",
-            "block_placed": "sound_manager/assets/solidify.mp3",
-            "game_over": "sound_manager/assets/game_over.mp3",
-            "next_level": "sound_manager/assets/next_level.mp3"
+            "row_cleared": resource_path("sound_manager/assets/line_clear.mp3"),
+            "block_placed": resource_path("sound_manager/assets/solidify.mp3"),
+            "game_over": resource_path("sound_manager/assets/game_over.mp3"),
+            "next_level": resource_path("sound_manager/assets/next_level.mp3")
         }
         sound_effects_manager = SoundEffectsManager(sound_files)
 
@@ -51,7 +63,7 @@ def main():
         control_panel = ControlPanel(None, CELL_SIZE, GRID_WIDTH, GRID_HEIGHT, CONTROL_PANEL_WIDTH)
 
         # Define the path to the high_scores.json file
-        high_scores_file_path = "persistence_manager/data/high_scores.json"
+        high_scores_file_path = resource_path("persistence_manager/data/high_scores.json")
 
         # Initialize the HighScoresPersistenceManager with the file path
         high_scores_persistence_manager = HighScoresPersistenceManager(high_scores_file_path)
