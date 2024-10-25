@@ -49,7 +49,7 @@ jobs:
           main.py
         env:
           VERSION: ${{ github.sha }}
-          
+  
       - name: Build executable (windows)
         if: runner.os == 'Windows'
         run: |
