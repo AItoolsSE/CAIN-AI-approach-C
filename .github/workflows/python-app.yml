@@ -2,9 +2,10 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "NEWbranch" ]
+
+permissions:
+  contents: write  
 
 jobs:
   build:
@@ -34,11 +35,36 @@ jobs:
           pip install pyinstaller
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
 
-      - name: Build executable
+      - name: Build executable (not windows)
+        if: runner.os != 'Windows'
         run: |
-          pyinstaller --onefile --windowed main.py
+          pyinstaller --onefile --windowed \
+          --icon=assets/tetris_icon.icns \
+          --add-data "game_engine:game_engine" \
+          --add-data "input_handler:input_handler" \
+          --add-data "persistence_manager:persistence_manager" \
+          --add-data "sound_manager:sound_manager" \
+          --add-data "ui:ui" \
+          --add-data "assets:assets" \
+          main.py
         env:
           VERSION: ${{ github.sha }}
+          
+      - name: Build executable (windows)
+        if: runner.os == 'Windows'
+        run: |
+          & pyinstaller --onefile --windowed `
+            --icon=assets/tetris_icon.ico `
+            --add-data "game_engine;game_engine" `
+            --add-data "input_handler;input_handler" `
+            --add-data "persistence_manager;persistence_manager" `
+            --add-data "sound_manager;sound_manager" `
+            --add-data "ui;ui" `
+            --add-data "assets;assets" `
+            main.py
+        env:
+          VERSION: ${{ github.sha }}
+
 
       - name: Rename executable (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -52,21 +78,21 @@ jobs:
 
       - name: Upload artifact for Ubuntu
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: Tetris-C-Linux
+          name: main-ubuntu
           path: dist/Tetris-C-Linux
       - name: Upload artifact for macOS
         if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: Tetris-C-macos
+          name: main-macos
           path: dist/Tetris-C-macos
       - name: Upload artifact for Windows
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: Tetris-C-windows
+          name: main-windows
           path: dist/Tetris-C-windows.exe
 
   cd:
@@ -76,26 +102,26 @@ jobs:
 
     steps:
       - name: Download artifact for Ubuntu
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
-          name: Tetris-C-Linux
+          name: main-ubuntu
           path: ./dist/
       - name: Download artifact for macOS
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
-          name: Tetris-C-macos
+          name: main-macos
           path: ./dist/
       - name: Download artifact for Windows
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
-          name: Tetris-C-windows
+          name: main-windows
           path: ./dist/
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
         with:
           tag_name: v1.0.${{ github.run_number }}
           release_name: Release v1.0.${{ github.run_number }}
@@ -105,7 +131,7 @@ jobs:
       - name: Upload Release Asset for Linux
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dist/Tetris-C-Linux
