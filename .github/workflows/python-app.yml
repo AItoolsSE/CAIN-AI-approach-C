@@ -45,7 +45,7 @@ jobs:
           --add-data "persistence_manager:persistence_manager" \
           --add-data "sound_manager:sound_manager" \
           --add-data "ui:ui" \
-          --add-data "assets:assets" \
+          --add-data "sound_manager/assets:sound_manager/assets" \
           main.py
         env:
           VERSION: ${{ github.sha }}
@@ -60,7 +60,7 @@ jobs:
             --add-data "persistence_manager;persistence_manager" `
             --add-data "sound_manager;sound_manager" `
             --add-data "ui;ui" `
-            --add-data "assets;assets" `
+            --add-data "sound_manager/assets;sound_manager/assets" `
             main.py
         env:
           VERSION: ${{ github.sha }}
