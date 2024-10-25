@@ -53,7 +53,7 @@ jobs:
       - name: Build executable (windows)
         if: runner.os == 'Windows'
         run: |
-          & pyinstaller --onefile  `
+          & pyinstaller --onefile --windowed `
             --icon=assets/tetris_icon.ico `
             --add-data "game_engine;game_engine" `
             --add-data "input_handler;input_handler" `
